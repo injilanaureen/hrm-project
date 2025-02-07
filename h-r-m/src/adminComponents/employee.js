@@ -43,6 +43,7 @@ const EmployeeTabs = () => {
    
      });
   const [formData, setFormData] = useState({
+  
     empStatus: '',
     empManager: '',
     empTeamLeader: '',
@@ -56,13 +57,16 @@ const EmployeeTabs = () => {
       const response = await axios.get('http://localhost:5000/api/adduser/getAllEmployees');
       if (response.data.success) {
         const employeesData = response.data.data;
+        console.log(employeesData)
         setEmployees(employeesData);
         
         // Separate employees based on their statuses and roles
         const inactiveEmployeesData = employeesData.filter(emp => emp.emp_status === 'Inactive');
         const activeEmployeesData = employeesData.filter(emp => emp.emp_status === 'Active');
-        const managers = employeesData.filter(emp => emp.emp_designation === 'Manager');
-        const teamLeaders = employeesData.filter(emp => emp.emp_designation === 'Team Leader');
+        const managers = employeesData.filter(emp => emp.emp_designation === 5);
+        console.log(managers)
+        const teamLeaders = employeesData.filter(emp => emp.emp_designation === 7);
+        console.log(teamLeaders)
         
         setInactiveEmployees(inactiveEmployeesData);
         setActiveEmployees(activeEmployeesData);
@@ -136,13 +140,13 @@ const EmployeeTabs = () => {
 
   // Open dialog for editing employee details
   const openDialog = (employee) => {
-
+    console.log(employee);
     const tempPassword = Math.random().toString(36).slice(-8);
-    const generatedEmail = employee.emp_full_name.toLowerCase().replace(/\s+/g, '.') + '@nikatby.com';
+    const generatedEmail = employee.emp_full_name.toLowerCase().replace(/\s+/g, '') + '@nikatby.com';
     
     setSelectedEmployee(employee);
     setFormData({
-      id: employee.id, // Ensure correct `id` is stored
+    id: employee._id, // Ensure correct `id` is stored
     empStatus: '',
     empManager: '',
     empTeamLeader: '',
@@ -178,9 +182,11 @@ const EmployeeTabs = () => {
   
   // Handle form submission
   const handleSubmit = async (e) => {
+    console.log(selectedEmployee)
+    console.log(formData);
 
     e.preventDefault();
-    if (!selectedEmployee || !selectedEmployee.id) {
+    if (!selectedEmployee || !selectedEmployee._id) {
       alert("Error: Employee ID is missing.");
       return;
     }
@@ -330,10 +336,10 @@ const EmployeeTabs = () => {
                 <td className="py-2 px-3">{employee.role_name}</td>
                 <td className="py-2 px-3">{employee.emp_email}</td>
                 <td className="py-2 px-3">{employee.emp_phone_no}</td>
-                <td className="py-2 px-3">{employee.emp_department}</td>
-                <td className="py-2 px-3">{employee.emp_designation}</td>
-                <td className="py-2 px-3">{employee.team_leader_name || 'Not assigned'}</td>
-                <td className="py-2 px-3">{employee.manager_name || 'Not assigned'}</td>
+                <td className="py-2 px-3">{employee.department_name}</td>
+                <td className="py-2 px-3">{employee.designation_name}</td>
+                <td className="py-2 px-3">{employee.team_leader_id || 'Not assigned'}</td>
+                <td className="py-2 px-3">{employee.manager_id || 'Not assigned'}</td>
                 <td className="py-2 px-3">{new Date(employee.emp_join_date).toLocaleDateString('en-GB')}</td>
                 <td className="py-2 px-3 bg-green-500 text-white">{employee.emp_status}</td>
                 <td className={`py-2 px-3 ${employee.emp_empstatus === 'Permanent' ? 'bg-green-600' : 'bg-yellow-500'} text-white`}>{employee.emp_empstatus}</td>
@@ -426,7 +432,6 @@ const EmployeeTabs = () => {
                 <th className="py-2 px-3 text-white text-left">Personal email</th>
                 <th className="py-2 px-3 text-white text-left">Department</th>
                 <th className="py-2 px-3 text-white text-left">Offered position</th>
-                <th className="py-2 px-3 text-white text-left">Department</th>
                 <th className="py-2 px-3 text-white text-left">Confirmation date</th>
                 <th className="py-2 px-3 text-white text-left">Expected Joining date</th>
                 <th className="py-2 px-3 text-white text-left">Offered CTC</th>
@@ -437,13 +442,12 @@ const EmployeeTabs = () => {
             <tbody>
               {inactiveEmployees.map(employee => (
                 <tr key={employee.id} className="border-b">
-                  <td className="py-2 px-3">{employee.id}</td>
+                  <td className="py-2 px-3">{employee._id}</td>
                   <td className="py-2 px-3">{employee.emp_full_name}</td>
                   <td className="py-2 px-3">{employee.role_name}</td>
                   <td className="py-2 px-3">{employee.emp_personal_email}</td>
-                  <td className="py-2 px-3">{employee.emp_department}</td>
-                  <td className="py-2 px-3">{employee.emp_designation}</td>
-                  <td className="py-2 px-3">{employee.emp_department}</td>
+                  <td className="py-2 px-3">{employee.department_name}</td>
+                  <td className="py-2 px-3">{employee.designation_name}</td>
                   <td className="py-2 px-3">{new Date(employee.emp_confirmation_date).toLocaleDateString('en-GB')}</td>
                   <td className="py-2 px-3">{new Date(employee.emp_join_date).toLocaleDateString('en-GB')}</td>
                   <td className="py-2 px-3">{employee.emp_offered_ctc}</td>
@@ -481,40 +485,45 @@ const EmployeeTabs = () => {
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded-md text-sm"
           >
-                        <option value="" disabled>Select Status</option> {/* Empty option for the first value */}
-
+            <option value="" disabled>Select Status</option> {/* Empty option for the first value */}
             <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
+          
           </select>
         </div>
         <div className="mb-4">
-          <label className="block text-sm">Manager</label>
-          <select
-            name="empManager"
-            value={formData.empManager}
-            onChange={handleChange} 
-            className="w-full p-2 border border-gray-300 rounded-md text-sm"
-          >
-            <option value="" disabled>Select Manager</option> {/* Empty option for the first value */}
-            {managerList.map(manager => (
-              <option key={manager.id} value={manager.id}>{manager.emp_full_name}</option>
-            ))}
-          </select>
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm">Team Leader</label>
-          <select
-            name="empTeamLeader"
-            value={formData.empTeamLeader}
-            onChange={handleChange} 
-            className="w-full p-2 border border-gray-300 rounded-md text-sm"
-          >
-            <option value="" disabled>Select Team Leader</option> {/* Empty option for the first value */}
-            {teamLeaderList.map(leader => (
-              <option key={leader.id} value={leader.id}>{leader.emp_full_name}</option>
-            ))}
-          </select>
-        </div>
+  <label className="block text-sm">Manager</label>
+  <select
+    name="empManager"
+    value={formData.empManager}
+    onChange={handleChange}
+    className="w-full p-2 border border-gray-300 rounded-md text-sm"
+  >
+    <option value="" disabled>Select Manager</option> {/* Empty option for the first value */}
+    {managerList
+      .filter(manager => manager._id !== selectedEmployee._id) // Exclude the current user
+      .map(manager => (
+        <option key={manager.emp_id} value={manager.emp_id}>{manager.emp_full_name}</option>
+      ))}
+  </select>
+</div>
+
+<div className="mb-4">
+  <label className="block text-sm">Team Leader</label>
+  <select
+    name="empTeamLeader"
+    value={formData.empTeamLeader}
+    onChange={handleChange}
+    className="w-full p-2 border border-gray-300 rounded-md text-sm"
+  >
+    <option value="" disabled>Select Team Leader</option> {/* Empty option for the first value */}
+    {teamLeaderList
+      .filter(leader => leader._id !== selectedEmployee._id) // Exclude the current user
+      .map(leader => (
+        <option key={leader.emp_id} value={leader.emp_id}>{leader.emp_full_name}</option>
+      ))}
+  </select>
+id</div>
+
 
             <div className="mb-4">
               <label className="block text-sm">Work Email</label>

@@ -155,6 +155,7 @@ addUserRoutes.post('/submitUser', async (req, res) => {
   const last_updated_time = new Date();
   const last_updated_status = "New";
   const employement_status= 'Probation';
+  const emp_id=  "NIK" + Math.floor(100000 + Math.random() * 900000); // Generate emp_id for MongoDB
 
   
 
@@ -180,7 +181,7 @@ addUserRoutes.post('/submitUser', async (req, res) => {
     emp_password: null, // Assuming no password in the form
     manager_id: null,
     team_leader_id: null,
-    emp_id: null, // Generated emp_id for future use
+    emp_id:emp_id , // Generated emp_id for future use
     last_updated_time: last_updated_time,
     last_updated_status: last_updated_status,
   });
@@ -293,9 +294,6 @@ addUserRoutes.get('/getAllEmployees', async (req, res) => {
   }
 });
 
-
-
-
 // Fetch all roles (MongoDB example)
 
 addUserRoutes.get('/getSingleEmployee/:emp_id', async (req, res) => {
@@ -347,34 +345,19 @@ addUserRoutes.put('/updateUserStatus', async (req, res) => {
   const last_updated_status = 'Activated';
   const last_updated_time = new Date();
 
-  // Convert id to integer if it's passed as a string
-  id = parseInt(id, 10);
-  if (isNaN(id)) {
+  console.log("Received id:", id); // Log the id to check its format
+
+  // Check if the received id is a valid ObjectId
+  if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).json({
       success: false,
-      error: "Invalid Employee ID. It must be a number."
-    });
-  }
-
-  // Validate required fields
-  const missingFields = [];
-  if (!empStatus) missingFields.push("empStatus");
-  if (!empManager) missingFields.push("empManager");
-  if (!empTeamLeader) missingFields.push("empTeamLeader");
-  if (!workEmail) missingFields.push("workEmail");
-  if (!empPassword) missingFields.push("empPassword");
-
-  if (missingFields.length > 0) {
-    return res.status(400).json({
-      success: false,
-      error: "Required fields missing",
-      missingFields
+      error: "Invalid Employee ID format"
     });
   }
 
   try {
-    // Fetch user details from the database by id
-    const user = await User.findOne({ id: id });
+    // Now, use the valid ObjectId for querying
+    const user = await User.findById(id);  // Directly use the id since it's valid
 
     if (!user) {
       return res.status(404).json({
@@ -395,9 +378,9 @@ addUserRoutes.put('/updateUserStatus', async (req, res) => {
       }
     }
 
-    // Now update the employee details
-    const updatedUser = await User.findOneAndUpdate(
-      { id: id }, // Condition to find user by id
+    // Update employee details
+    const updatedUser = await User.findByIdAndUpdate(
+      id, // Directly use _id for querying
       {
         $set: {
           emp_status: empStatus,
@@ -428,6 +411,7 @@ addUserRoutes.put('/updateUserStatus', async (req, res) => {
     });
   }
 });
+
 
 
 // addUserRoutes.get('/fetchDesignation/:id', async (req, res) => {
