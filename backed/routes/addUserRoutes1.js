@@ -297,49 +297,49 @@ addUserRoutes.get('/getAllEmployees', async (req, res) => {
 
 // Fetch all roles (MongoDB example)
 
-addUserRoutes.get('/getSingleEmployee/:emp_id', async (req, res) => {
-  const { emp_id } = req.params;
+// addUserRoutes.get('/getSingleEmployee/:emp_id', async (req, res) => {
+//   const { emp_id } = req.params;
 
-  if (typeof emp_id !== 'string') {
-      return res.status(400).json({
-          success: false,
-          error: "Invalid emp_id format",
-      });
-  }   
+//   if (typeof emp_id !== 'string') {
+//       return res.status(400).json({
+//           success: false,
+//           error: "Invalid emp_id format",
+//       });
+//   }   
 
-  try {
-      // Find the employee by emp_id
-      const employee = await User.findOne({ emp_id })
-          .populate('emp_department', 'dep_name') // Populating department info
-          .populate('emp_designation', 'designation_name') // Populating designation info
-          .populate('role_id', 'role permission') // Populating role and permission
-          .populate('team_leader_id', 'emp_full_name') // Populating team leader info
-          .populate('manager_id', 'emp_full_name') // Populating manager info
-          .populate('bank_details') // Populating bank details
-          .populate('personal_information') // Populating personal information
-          .populate('educational_background'); // Populating educational background
+//   try {
+//       // Find the employee by emp_id
+//       const employee = await User.findOne({ emp_id })
+//           .populate('emp_department', 'dep_name') // Populating department info
+//           .populate('emp_designation', 'designation_name') // Populating designation info
+//           .populate('role_id', 'role permission') // Populating role and permission
+//           .populate('team_leader_id', 'emp_full_name') // Populating team leader info
+//           .populate('manager_id', 'emp_full_name') // Populating manager info
+//           .populate('bank_details') // Populating bank details
+//           .populate('personal_information') // Populating personal information
+//           .populate('educational_background'); // Populating educational background
 
-      if (!employee) {
-          return res.status(404).json({
-              success: false,
-              message: "Employee not found",
-          });
-      }
+//       if (!employee) {
+//           return res.status(404).json({
+//               success: false,
+//               message: "Employee not found",
+//           });
+//       }
 
-      return res.status(200).json({
-          success: true,
-          message: "Successfully fetched employee",
-          data: employee,
-      });
-  } catch (err) {
-      console.error("Error fetching employee:", err);
-      return res.status(500).json({
-          success: false,
-          error: "Failed to fetch employee",
-          details: err.message,
-      });
-  }
-});
+//       return res.status(200).json({
+//           success: true,
+//           message: "Successfully fetched employee",
+//           data: employee,
+//       });
+//   } catch (err) {
+//       console.error("Error fetching employee:", err);
+//       return res.status(500).json({
+//           success: false,
+//           error: "Failed to fetch employee",
+//           details: err.message,
+//       });
+//   }
+// });
 
 addUserRoutes.put('/updateUserStatus', async (req, res) => {
   let { id, empStatus, empManager, empTeamLeader, workEmail, empPassword } = req.body;
@@ -576,11 +576,12 @@ addUserRoutes.get('/getSingleEmployeeBy/:emp', async (req, res) => {
     console.log("Personal data:", personalData);
 
     // Find manager details
-    let manager = null;
-    if (user.manager_id) {
-      manager = await User.findOne({ emp_id: user.manager_id }, { emp_full_name: 1 });
-      console.log("Manager data:", manager);
-    }
+    const manager = await User.findOne({ emp_id: user.manager_id });
+    console.log("Manager data:", manager);
+
+    // Find team leader details
+    const teamLeader = await User.findOne({ emp_id: user.team_leader_id });
+    console.log("Team Leader data:", teamLeader);
 
     // Combine all data into one result
     const result = {
@@ -590,7 +591,8 @@ addUserRoutes.get('/getSingleEmployeeBy/:emp', async (req, res) => {
       banking,
       education,
       personalData,
-      manager: manager ? manager.emp_full_name : "Not Assigned"
+      manager_name: manager ? manager.emp_full_name : "Not Assigned",
+      team_leader_name: teamLeader ? teamLeader.emp_full_name : "Not Assigned",
     };
 
     // Send the response
@@ -600,9 +602,6 @@ addUserRoutes.get('/getSingleEmployeeBy/:emp', async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
-
-
-
 
 // Insert personal information from request body
 addUserRoutes.post("/addPersonalInfo", async (req, res) => {
@@ -665,6 +664,87 @@ addUserRoutes.put("/updateEmergencyContact/:id", async (req, res) => {
     res.status(500).json({ success: false, error: "Internal server error" });
   }
 });
+
+
+
+//updateNamemarital_status
+
+addUserRoutes.put("/updateNamemarital_status/:id", async (req, res) => {
+  console.log("id:", req.params.id);
+  console.log("body:", req.body);
+
+  try {
+    const { id } = req.params;
+    const { emp_name, marital_status } = req.body;
+
+    if (!emp_name || !marital_status) {
+      return res.status(400).json({ success: false, error: "Missing fields" });
+    }
+
+    // Update name in the User model
+    const updatedUser = await User.findOneAndUpdate(
+      { emp_id: id }, 
+      { $set: { emp_full_name: emp_name } }, 
+      { new: true }
+    );
+
+    // Update marital status in the PersonalInformation model
+    const updatedPersonalInfo = await PersonalInformation.findOneAndUpdate(
+      { emp_id: id }, 
+      { $set: { marital_status: marital_status } }, 
+      { new: true }
+    );
+
+    if (!updatedUser || !updatedPersonalInfo) {
+      return res.status(404).json({ success: false, error: "Employee not found" });
+    }
+
+    res.json({
+      success: true,
+      message: "Name and marital status updated successfully",
+      data: { updatedUser, updatedPersonalInfo },
+    });
+
+  } catch (error) {
+    console.error("Error updating employee:", error);
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+});
+
+
+addUserRoutes.put("/updatePersonalIdentity/:id", async (req, res) => {
+  try {
+    const { id } = req.params; // Employee ID (emp_id)
+    const { emp_addhar_no, emp_pan_card_no } = req.body;
+
+    // Check if required fields exist
+    if (!emp_addhar_no || !emp_pan_card_no) {
+      return res.status(400).json({ success: false, error: "All fields are required" });
+    }
+
+    // Find user by emp_id and update the fields
+    const updatedUser = await User.findOneAndUpdate(
+      { emp_id: id }, // Find by emp_id
+      {
+        $set: {
+          emp_addhar_no: emp_addhar_no,
+          emp_pan_card_no: emp_pan_card_no,
+        },
+      },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+
+    res.json({ success: true, message: "Personal identity updated", user: updatedUser });
+  } catch (error) {
+    console.error("Error updating personal identity:", error);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+});
+
 
 
 export default addUserRoutes;
