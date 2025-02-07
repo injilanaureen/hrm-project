@@ -44,48 +44,56 @@ function EmployeePersonalDetails() {
   };
 
   const handleSaveChanges = async () => {
+    // Validate emergency mobile number (exactly 10 digits)
+    const emergencyMobNo = modalEmployee.personalData.emergency_mob_no;
+    const isValidMobile = /^\d{10}$/.test(emergencyMobNo); // Only allows exactly 10 digits
+  
+    if (!isValidMobile) {
+      console.error("Invalid emergency mobile number:", emergencyMobNo);
+      alert("Please enter a valid 10-digit emergency mobile number.");
+      return;
+    }
+  
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/adduser/updateEmergencyContact/${employee.emp_id}`,
+        `http://localhost:5000/api/adduser/updateEmergencyContact/${employee.user?.emp_id}`,
         {
-          emergency_person_name: modalEmployee.emergency_person_name,
-          emergency_relationship: modalEmployee.emergency_relationship,
-          emergency_address: modalEmployee.emergency_address,
-          emergency_mob_no: modalEmployee.emergency_mob_no,
+          emergency_person_name: modalEmployee.personalData.emergency_person_name,
+          emergency_relationship: modalEmployee.personalData.emergency_relationship,
+          emergency_address: modalEmployee.personalData.emergency_address,
+          emergency_mob_no: emergencyMobNo, // Validated number
         }
       );
-
+  
       if (response.data.success) {
-        setEmployee({
-          ...employee,
-          emergency_person_name: modalEmployee.emergency_person_name,
-          emergency_relationship: modalEmployee.emergency_relationship,
-          emergency_address: modalEmployee.emergency_address,
-          emergency_mob_no: modalEmployee.emergency_mob_no,
-        });
-        setIsModalOpen(false); // Close the modal after saving
+        setEmployee((prevEmployee) => ({
+          ...prevEmployee,
+          personalData: {
+            ...prevEmployee.personalData,
+            emergency_person_name: modalEmployee.personalData.emergency_person_name,
+            emergency_relationship: modalEmployee.personalData.emergency_relationship,
+            emergency_address: modalEmployee.personalData.emergency_address,
+            emergency_mob_no: emergencyMobNo,
+          },
+        }));
+  
+        setIsModalOpen(false);
       } else {
-        console.error(
-          "Failed to update emergency contact:",
-          response.data.error
-        );
+        console.error("Failed to update emergency contact:", response.data.error);
       }
     } catch (error) {
       console.error("Error updating emergency contact:", error);
     }
-    setIsModalOpen(false);
   };
+  
+  
   const getEmployee = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/adduser/getSingleEmployee/${empId}`
+        `http://localhost:5000/api/adduser/getSingleEmployeeBy/${empId}`
       );
       console.log(response.data);
-      if (response.data.success) {
-        setEmployee(response.data.data);
-      } else {
-        console.error("Failed to fetch employee:", response.data.error);
-      }
+      setEmployee(response.data);
     } catch (error) {
       console.error("Failed to fetch employee:", error);
     }
@@ -128,22 +136,27 @@ function EmployeePersonalDetails() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
             <p className="text-gray-500 text-xs">Full Name</p>
-            <p className="text-sm">{employee.emp_full_name || "User"}</p>
+            <p className="text-sm">{employee.user?.emp_full_name || "User"}</p>
           </div>
 
           <div>
             <p className="text-gray-500 text-xs">Gender</p>
-            <p className="text-sm">{employee.emp_gender || "Not Given"}</p>
+            <p className="text-sm">
+              {employee.user?.emp_gender || "Not Given"}
+            </p>
           </div>
           <div>
             <p className="text-gray-500 text-xs">Date Of Birth</p>
             <p className="text-sm">
-              {new Date(employee.emp_dob).toLocaleDateString() || "Not Given "}
+              {new Date(employee.user?.emp_dob).toLocaleDateString() ||
+                "Not Given "}
             </p>
           </div>
           <div>
             <p className="text-gray-500 text-xs">Marital Status</p>
-            <p className="text-sm">{employee.marital_status || ""}</p>
+            <p className="text-sm">
+              {employee.personalData?.marital_status || ""}
+            </p>
           </div>
         </div>
 
@@ -156,14 +169,14 @@ function EmployeePersonalDetails() {
             <div>
               <p className="text-gray-500 text-xs">Permanent Postal Address</p>
               <p className="text-sm">
-                {`${employee.permanent_address} ${employee.permanent_city} ${employee.permanent_state} ${employee.permanent_zip_code} ` ||
+                {`${employee.personalData?.permanent_address} ${employee.personalData?.permanent_city} ${employee.personalData?.permanent_state} ${employee.personalData?.permanent_zip_code} ` ||
                   "Not provided"}
               </p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">Present Postal Address</p>
               <p className="text-sm">
-                {`${employee.current_address} ${employee.current_city} ${employee.current_state} ${employee.current_zip_code} ` ||
+                {`${employee.personalData?.current_address} ${employee.personalData?.current_city} ${employee.personalData?.current_state} ${employee.personalData?.current_zip_code} ` ||
                   "Not provided"}
               </p>
             </div>
@@ -186,28 +199,32 @@ function EmployeePersonalDetails() {
             <div>
               <p className="text-gray-500 text-xs">Blood Group</p>
               <p className="text-sm">
-                {employee.blood_group || "Not Provided"}
+                {employee.personalData?.blood_group || "Not Provided"}
               </p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">Emergency Contact Name</p>
               <p className="text-sm">
-                {employee?.emergency_person_name || "NA"}
+                {employee?.personalData?.emergency_person_name || "NA"}
               </p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">Relationship</p>
               <p className="text-sm">
-                {employee?.emergency_relationship || "NA"}
+                {employee?.personalData?.emergency_relationship || "NA"}
               </p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">Emergency Address</p>
-              <p className="text-sm">{employee?.emergency_address || "NA"}</p>
+              <p className="text-sm">
+                {employee?.personalData?.emergency_address || "NA"}
+              </p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">Emergency Mobile No</p>
-              <p className="text-sm">{employee?.emergency_mob_no || "NA"}</p>
+              <p className="text-sm">
+                {employee?.personalData?.emergency_mob_no || "NA"}
+              </p>
             </div>
           </div>
           {/* Modal for Editing */}
@@ -223,11 +240,16 @@ function EmployeePersonalDetails() {
                   </label>
                   <input
                     type="text"
-                    value={modalEmployee?.emergency_person_name || ""}
+                    value={
+                      modalEmployee?.personalData?.emergency_person_name || ""
+                    }
                     onChange={(e) =>
                       setModalEmployee({
                         ...modalEmployee,
-                        emergency_person_name: e.target.value,
+                        personalData: {
+                          ...modalEmployee.personalData, // Preserve existing personalData
+                          emergency_person_name: e.target.value,
+                        },
                       })
                     }
                     className="w-full p-2 border border-gray-300 rounded"
@@ -237,11 +259,16 @@ function EmployeePersonalDetails() {
                   <label className="text-gray-500 text-xs">Relationship</label>
                   <input
                     type="text"
-                    value={modalEmployee?.emergency_relationship || ""}
+                    value={
+                      modalEmployee?.personalData?.emergency_relationship || ""
+                    }
                     onChange={(e) =>
                       setModalEmployee({
                         ...modalEmployee,
-                        emergency_relationship: e.target.value,
+                        personalData: {
+                          ...modalEmployee.personalData, // Preserve existing personalData
+                          emergency_relationship: e.target.value,
+                        },
                       })
                     }
                     className="w-full p-2 border border-gray-300 rounded"
@@ -253,11 +280,14 @@ function EmployeePersonalDetails() {
                   </label>
                   <input
                     type="text"
-                    value={modalEmployee?.emergency_address || ""}
+                    value={modalEmployee?.personalData?.emergency_address || ""}
                     onChange={(e) =>
-                      setModalEmployee({
-                        ...modalEmployee,
-                        emergency_address: e.target.value,
+                        setModalEmployee({
+                          ...modalEmployee,
+                          personalData: {
+                          ...modalEmployee.personalData, // Preserve existing personalData
+                          emergency_address: e.target.value,
+                        },
                       })
                     }
                     className="w-full p-2 border border-gray-300 rounded"
@@ -269,11 +299,14 @@ function EmployeePersonalDetails() {
                   </label>
                   <input
                     type="text"
-                    value={modalEmployee?.emergency_mob_no || ""}
+                    value={modalEmployee?.personalData?.emergency_mob_no || ""}
                     onChange={(e) =>
                       setModalEmployee({
                         ...modalEmployee,
-                        emergency_mob_no: e.target.value,
+                        personalData: {
+                          ...modalEmployee.personalData, // Preserve existing personalData
+                          emergency_mob_no: e.target.value,
+                        },
                       })
                     }
                     className="w-full p-2 border border-gray-300 rounded"
@@ -309,19 +342,19 @@ Section */}
             <div>
               <p className="text-gray-500 text-xs">Addhaar</p>
               <p className="text-sm">
-                {employee.emp_addhar_no || "Not Provided"}
+                {employee.user?.emp_addhar_no || "Not Provided"}
               </p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">Pan</p>
               <p className="text-sm">
-                {employee.emp_pan_card_no || "Not Provided"}
+                {employee.user?.emp_pan_card_no || "Not Provided"}
               </p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">Driving Licence</p>
               <p className="text-sm">
-                {employee.driving_Licence || "Not Provided"}
+                {employee.user?.driving_Licence || "Not Provided"}
               </p>
             </div>
           </div>
@@ -330,26 +363,26 @@ Section */}
         {/* Separator */}
         <hr className="my-6 border-gray-200" />
 
-        {/* employeeEducation 
-Section */}
-        <div>
-          <h3 className="text-sm font-medium mb-3">Education</h3>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {employeeEducation && employeeEducation.length > 0 ? (
-              employeeEducation.map((edu, index) => (
-                <div key={index}>
-                  <p className="text-gray-500 text-xs">{edu.degree}</p>
-                  <p className="text-sm">{edu.institution || "Not Provided"}</p>
-                  <p className="text-sm">
-                    {edu.year_of_passing || "Not Provided"}
-                  </p>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm">No Education Details Provided</p>
-            )}
-          </div>
-        </div>
+          {/* Education Section */}
+          <div>
+  <h3 className="text-sm font-medium mb-3">Education</h3>
+  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+  {employee.education.education && employee.education.education.length > 0 ? (
+    employee.education.education.map((edu, index) => (
+      <div key={edu._id || index} className="p-2 border rounded-lg shadow-sm">
+        <p className="text-gray-600 text-xs font-semibold">{edu.degree || "Not Provided"}</p>
+        <p className="text-sm text-gray-800">{edu.institution || "Not Provided"}</p>
+        <p className="text-sm text-gray-700">{edu.year_of_passing || "Not Provided"}</p>
+      </div>
+    ))
+  ) : (
+    <p className="text-sm text-gray-600 col-span-2 md:col-span-5 text-center">
+      No Education Details Provided
+    </p>
+  )}
+</div>
+ 
+</div>
 
         {/* Separator */}
         <hr className="my-6 border-gray-200" />
@@ -360,32 +393,27 @@ Section */}
             <div>
               <p className="text-gray-500 text-xs">Account Holder Name</p>
               <p className="text-sm">
-                {employee.account_holder_name	 || "Not Provided"}
+                {employee.banking?.account_holder_name || "Not Provided"}
               </p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">Bank Name</p>
-              <p className="text-sm">
-                {employee.bank_name || "Not Provided"}
-              </p>
+              <p className="text-sm">{employee.banking?.bank_name || "Not Provided"}</p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">Branch Name </p>
               <p className="text-sm">
-                {employee.branch_name || "Not Provided"}
+                {employee.banking?.branch_name
+                  || "Not Provided"}
               </p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">Account No</p>
-              <p className="text-sm">
-                {employee.account_no || "Not Provided"}
-              </p>
+              <p className="text-sm">{employee.banking?.account_number || "Not Provided"}</p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">IFSC Code</p>
-              <p className="text-sm">
-                {employee.IFSC_code	 || "Not Provided"}
-              </p>
+              <p className="text-sm">{employee.banking?.ifsc_code || "Not Provided"}</p>
             </div>
           </div>
         </div>

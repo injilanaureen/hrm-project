@@ -8,6 +8,7 @@ import Banking from '../models/Banking .js';
 import Education from '../models/Education.js';
 import PersonalInformation from '../models/PersonalInformation.js';
 import moment from 'moment';
+import ResignedEmployee from '../models/ResignedEmployee.js';
 const addUserRoutes = express.Router();
 
 // Fetch all roles (MongoDB example)
@@ -428,6 +429,33 @@ addUserRoutes.put('/updateUserStatus', async (req, res) => {
   }
 });
 
+addUserRoutes.get("/fetchDesignation", async (req, res) => {
+  const { dept_id } = req.query;
+  console.log(typeof(dept_id));
+
+  if (!dept_id) {
+    return res.status(400).json({
+      success: false,
+      error: "Department ID is required",
+    });
+  }
+
+  try {
+    const designations = await Designation.find({ dept_id });
+    return res.json({
+      success: true,
+      message: "Designations fetched successfully",
+      data: designations,
+    });
+  } catch (error) {
+    console.error("Database error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Failed to fetch designations",
+      details: error.message,
+    });
+  }
+});
 
 
 // addUserRoutes.get('/fetchDesignation/:id', async (req, res) => {
@@ -559,10 +587,12 @@ addUserRoutes.post('/addEducation', async (req, res) => {
 
 addUserRoutes.get('/getSingleEmployeeBy/:emp', async (req, res) => {
   const { emp } = req.params;
+  console.log("Searching for emp_id:", emp);
  
   try {
     // Find employee details
     const user = await User.findOne({ emp_id: emp });
+    console.log("User data:", user);
  
     if (!user) {
       return res.status(404).json({ message: 'Employee not found' });
@@ -570,18 +600,32 @@ addUserRoutes.get('/getSingleEmployeeBy/:emp', async (req, res) => {
  
     // Fetch department details
     const department = await Department.findOne({ dep_id: user.emp_department });
+    console.log("Department data:", department);
  
     // Fetch designation details
-    const designation = await Designation.findOne({ designation_id : user.emp_designation });
+    const designation = await Designation.findOne({ designation_id: user.emp_designation });
+    console.log("Designation data:", designation);
  
     // Find banking details
     const banking = await Banking.findOne({ emp_id: emp });
+    console.log("Banking data:", banking);
  
     // Find education details
     const education = await Education.findOne({ emp_id: emp });
+    console.log("Education data:", education);
  
     // Find personal details
-    const personalData = await PersonalInformation.findOne({ emp_id: emp }); 
+    const personalData = await PersonalInformation.findOne({ emp_id: emp });
+    console.log("Personal data:", personalData);
+ 
+    // Find manager details
+    const manager = await User.findOne({ emp_id: user.manager_id });
+    console.log("Manager data:", manager);
+ 
+    // Find team leader details
+    const teamLeader = await User.findOne({ emp_id: user.team_leader_id });
+    console.log("Team Leader data:", teamLeader);
+ 
     // Combine all data into one result
     const result = {
       user,
@@ -589,7 +633,10 @@ addUserRoutes.get('/getSingleEmployeeBy/:emp', async (req, res) => {
       designation, // Full designation details
       banking,
       education,
-      personalData
+      personalData,
+      manager_name: manager ? manager.emp_full_name : "Not Assigned",
+      team_leader_name: teamLeader ? teamLeader.emp_full_name : "Not Assigned",
+   
     };
  
     // Send the response
@@ -599,6 +646,7 @@ addUserRoutes.get('/getSingleEmployeeBy/:emp', async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+
 
 // Insert personal information from request body
 
@@ -708,6 +756,7 @@ if (Array.isArray(education) && education.length > 0) {
   }
 });
 
+
 addUserRoutes.put('/editEmployeeDetails', async (req, res) => {
   try {
     const { id, newDesignation, newStatus, newMobileNumber, newTeamLeader, newManager } = req.body;
@@ -743,6 +792,96 @@ addUserRoutes.put('/editEmployeeDetails', async (req, res) => {
   } catch (error) {
     console.error("Database error:", error);
     res.status(500).json({ success: false, error: "Failed to update employment details", details: error.message });
+  }
+});
+
+//updateEmergencyContact
+
+addUserRoutes.put("/updateEmergencyContact/:id", async (req, res) => {
+  try {
+    const { id } = req.params; // Corrected param to match route
+    const { emergency_person_name, emergency_relationship, emergency_address, emergency_mob_no } = req.body;
+
+    const updatedEmployee = await PersonalInformation.findOneAndUpdate(
+      { emp_id: id }, // Find employee by emp_id
+      {
+        $set: {
+          "emergency_person_name": emergency_person_name,
+          "emergency_relationship": emergency_relationship,
+          "emergency_address": emergency_address,
+          "emergency_mob_no": emergency_mob_no,
+        },
+      },
+      { new: true }
+    );
+
+    if (!updatedEmployee) {
+      return res.status(404).json({ success: false, error: "Employee not found" });
+    }
+
+    res.json({ success: true, data: updatedEmployee });
+  } catch (error) {
+    console.error("Error updating emergency contact:", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+});
+
+
+
+addUserRoutes.post("/resigned_employees",async (req, res) => {
+  try {
+    const {
+      emp_id,
+      employee_name,
+      last_working_day,
+      total_work_period,
+      last_ctc_drawn,
+      last_designation,
+      reason_for_resignation,
+      feedback,
+      exit_interview_done,
+      notice_period_served,
+      emp_status,
+      emp_empstatus,
+    } = req.body;
+
+    // Insert into ResignedEmployee collection
+    const resignedEmployee = new ResignedEmployee({
+      emp_id,
+      employee_name,
+      last_working_day,
+      total_work_period,
+      last_ctc_drawn,
+      last_designation,
+      reason_for_resignation,
+      feedback,
+      exit_interview_done,
+      notice_period_served,
+    });
+
+    await resignedEmployee.save();
+
+    // Update Employee status in Employee collection
+    await User.findOneAndUpdate(
+      { emp_id: emp_id },
+      { emp_status: emp_status, emp_empstatus: emp_empstatus }
+    );
+
+    res.status(200).json({ success: true, message: "Resignation details saved successfully" });
+  } catch (error) {
+    console.error("Error saving resignation details:", error);
+    res.status(500).json({ success: false, message: "Database error", error: error.message });
+  }
+});
+
+// Fetch all resigned employees
+addUserRoutes.get('/fetch_resigned_employees',async (req, res) => {
+  try {
+    const resignedEmployees = await ResignedEmployee.find();
+    res.status(200).json(resignedEmployees);
+  } catch (error) {
+    console.error("Error fetching resigned employees:", error);
+    res.status(500).json({ message: "Database error", error: error.message });
   }
 });
 
