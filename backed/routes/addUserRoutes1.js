@@ -4,8 +4,9 @@ import Department from '../models/Department.js';
 import Designation from '../models/Designation.js';
 import Role from '../models/Role.js'
 import mongoose from 'mongoose';
-
-
+import Banking from '../models/Banking .js';
+import Education from '../models/Education.js';
+import PersonalInformation from '../models/PersonalInformation.js';
 const addUserRoutes = express.Router();
 
 // Fetch all roles (MongoDB example)
@@ -306,7 +307,7 @@ addUserRoutes.get('/getSingleEmployee/:emp_id', async (req, res) => {
           success: false,
           error: "Invalid emp_id format",
       });
-  }
+  }   
 
   try {
       // Find the employee by emp_id
@@ -473,6 +474,160 @@ addUserRoutes.put('/updateUserStatus', async (req, res) => {
 //         });
 //     }
 // });
+
+
+// POST route to insert data into the Banking collection
+addUserRoutes.post('/addBanking', async (req, res) => {
+  const { emp_id, bank_name, account_number, ifsc_code, branch_name, account_type } = req.body;
+
+  // Validate the incoming data
+  if (!emp_id || !bank_name || !account_number || !ifsc_code || !branch_name || !account_type) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  try {
+    // Create a new banking document
+    const newBanking = new Banking({
+      emp_id,
+      bank_name,
+      account_number,
+      ifsc_code,
+      branch_name,
+      account_type,
+    });
+
+    // Save the banking document to the database
+    const savedBanking = await newBanking.save();
+
+    // Return a success response
+    return res.status(201).json({ message: 'Banking details added successfully', data: savedBanking });
+  } catch (error) {
+    console.error('Error inserting banking data:', error);
+    return res.status(500).json({ message: 'Server error, try again later', error: error.message });
+  }
+});
+
+
+addUserRoutes.post('/addEducation', async (req, res) => {
+  const { emp_id, degree, institution, year_of_passing } = req.body;
+
+  if (!emp_id || !degree || !institution || !year_of_passing) {
+    return res.status(400).json({ message: 'Please provide all required fields.' });
+  }
+
+  try {
+    const newEducation = new Education({
+      emp_id,
+      degree,
+      institution,
+      year_of_passing
+    });
+
+    await newEducation.save();
+    res.status(201).json({
+      message: 'Education details added successfully',
+      data: newEducation
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// addUserRoutes.get('/getEmployeeDetails/:emp', async (req, res) => {
+//   const { emp } = req.params;
+
+//   // Convert emp to string
+//   const empIdString = String(emp);
+//   console.log(`Emp ID as string: ${empIdString}`);
+
+//   try {
+//     const user = await User.find({ });
+//     console.log(user);
+
+//     if (!user) {
+//       return res.status(404).json({ message: 'Employee not found' });
+//     }
+
+//     res.status(200).json(user);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: 'Server error', error: error.message });
+//   }
+// });
+
+
+
+addUserRoutes.get('/getSingleEmployeeBy/:emp', async (req, res) => {
+  const { emp } = req.params;
+  console.log("Searching for emp_id:", emp);
+
+  try {
+    // Find employee details
+    const user = await User.findOne({ emp_id: emp });
+    console.log("User data:", user);
+
+    if (!user) {
+      return res.status(404).json({ message: 'Employee not found' });
+    }
+
+    // Find banking details
+    const banking = await Banking.findOne({ emp_id: emp });
+    console.log("Banking data:", banking);
+
+    // Find education details
+    const education = await Education.findOne({ emp_id: emp });
+    console.log("Education data:", education);
+
+    const personalData = await PersonalInformation.findOne({ emp_id: emp });
+    console.log("Personal data:", personalData);
+    // Combine all data into one result
+    const result = {
+      user,
+      banking,
+      education,
+      personalData
+    };
+
+    // Send the response
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error fetching employee details:", error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+
+// Insert personal information from request body
+addUserRoutes.post("/addPersonalInfo", async (req, res) => {
+  try {
+    const personalInfo = new PersonalInformation({
+      permanent_address: req.body.permanent_address,
+      permanent_city: req.body.permanent_city,
+      permanent_state: req.body.permanent_state,
+      permanent_zip_code: req.body.permanent_zip_code,
+      current_address: req.body.current_address,
+      current_city: req.body.current_city,
+      current_state: req.body.current_state,
+      current_zip_code: req.body.current_zip_code,
+      alternate_mob_no: req.body.alternate_mob_no,
+      emergency_person_name: req.body.emergency_person_name,
+      emergency_relationship: req.body.emergency_relationship,
+      emergency_mob_no: req.body.emergency_mob_no,
+      emergency_address: req.body.emergency_address,
+      emp_id: req.body.emp_id,
+      marital_status: req.body.marital_status,
+      blood_group: req.body.blood_group
+    });
+
+    await personalInfo.save();
+
+    res.status(201).json({ message: "Personal Information added successfully", personalInfo });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error adding personal information", error: error.message });
+  }
+});
 
 
 export default addUserRoutes;
