@@ -11,9 +11,9 @@ import { EllipsisVertical } from 'lucide-react';
 import { motion } from "framer-motion";
 const ResignedEmployees1 = () => {
   const [resignedEmployees, setResignedEmployees] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-      const [filteredEmployees, setFilteredEmployees] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [filteredEmployees, setFilteredEmployees] = useState([]);
     
       // Separate state for settings (different from filters)
       const [settings, setSettings] = useState({
@@ -42,6 +42,7 @@ const ResignedEmployees1 = () => {
   const fetchResignedEmployees = async () => {
     try {
       const response = await axios.get("http://localhost:5000/api/adduser/fetch_resigned_employees"); // API endpoint
+      console.log(response.data)
       setResignedEmployees(response.data);
     } catch (error) {
       console.error("Error fetching resigned employees:", error);
@@ -188,7 +189,7 @@ const ResignedEmployees1 = () => {
                   <td className="py-2 px-3">{emp.emp_id}</td>
                   <td className="py-2 px-3">{emp.employee_name}</td>
 
-                  <td className="py-2 px-3">{emp.last_working_day}</td>
+                  <td className="py-2 px-3">{new Date(emp.last_working_day).toLocaleDateString("en-GB")}</td>
                   <td className="py-2 px-3">{emp.total_work_period}</td>
                   <td className="py-2 px-3">{emp.last_ctc_drawn}</td>
                   <td className="py-2 px-3">{emp.last_designation}</td>

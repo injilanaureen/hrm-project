@@ -47,15 +47,47 @@ function EmployeePersonalDetailsForm({ setShowDialog1,selectedEmployee1}) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try
-    {
-      console.log(selectedEmployee1)
-      const dataToSubmit = { ...formData, emp_id: selectedEmployee1.emp_id };
-
-      const response = await axios.post("http://localhost:5000/api/adduser/submitPersonalInformation",dataToSubmit)
-      if(response.data.success){
+    try {
+      console.log(selectedEmployee1);
+  
+      // Prepare Data for Submission
+      const dataToSubmit = {
+        emp_id: selectedEmployee1.emp_id,
+        permanent_address: formData.permanent_address,
+        permanent_city: formData.permanent_city,
+        permanent_state: formData.permanent_state,
+        permanent_zip_code: formData.permanent_zip_code,
+        current_address: formData.current_address,
+        current_city: formData.current_city,
+        current_state: formData.current_state,
+        current_zip_code: formData.current_zip_code,
+        alternate_mob_no: formData.alternate_mob_no,
+        emergency_person_name: formData.emergency_person_name,
+        emergency_relationship: formData.emergency_relationship,
+        emergency_mob_no: formData.emergency_mob_no,
+        emergency_address: formData.emergency_address,
+        marital_status: formData.marital_status,
+        blood_group: formData.blood_group,
+        
+        // Banking Details
+        account_holder_name: formData.account_holder_name, // Ensure the correct field name
+        bank_name: formData.bank_name,
+        branch_name: formData.branch_name,
+        account_number: formData.account_no, // Ensure the correct field name
+        ifsc_code: formData.IFSC_code,
+  
+        // Education (Backend should be updated to handle an array)
+        education: formData.education
+      };
+      console.log(dataToSubmit)
+      const response = await axios.post("http://localhost:5000/api/adduser/addPersonalInformation", dataToSubmit);
+     
+      
+      if (response.status === 201) {
         console.log("User profile data added successfully:", response.data);
         setShowDialog1(false);
+        
+        // Reset Form Data
         setFormData({
           permanent_address: '',
           permanent_city: '',
@@ -71,34 +103,29 @@ function EmployeePersonalDetailsForm({ setShowDialog1,selectedEmployee1}) {
           emergency_mob_no: '',
           emergency_address: '',
           marital_status: '',
-          blood_group:'',
-          account_holder_name: '',
+          blood_group: '',
+          account_holder_name:'',
           bank_name: '',
           branch_name: '',
           account_no: '',
           IFSC_code: '',
-        education: [
-          { degree: 'High School', institution: '', year_of_passing: '' },
-          { degree: 'Intermediate', institution: '', year_of_passing: '' },
-          { degree: 'Graduation', institution: '', year_of_passing: '' },
-          { degree: 'Post Graduation', institution: '', year_of_passing: '' }
-        ]
-        })
-
-      }
-      else{
+          education: [
+            { degree: 'High School', institution: '', year_of_passing: '' },
+            { degree: 'Intermediate', institution: '', year_of_passing: '' },
+            { degree: 'Graduation', institution: '', year_of_passing: '' },
+            { degree: 'Post Graduation', institution: '', year_of_passing: '' }
+          ]
+        });
+  
+      } else {
         console.error("Failed to add user profile data:", response.data.error);
       }
-    }
-    
-    catch(error){
+    } catch (error) {
       console.error('Failed to submit form:', error);
       return;
     }
-    console.log('Form submitted:', formData);
-    setShowDialog1(false)
   };
-
+  
   return (
 <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center">
   <div className="bg-white p-8 rounded-md w-full md:w-3/4 lg:w-2/3">

@@ -7,6 +7,8 @@ import mongoose from 'mongoose';
 import Banking from '../models/Banking .js';
 import Education from '../models/Education.js';
 import PersonalInformation from '../models/PersonalInformation.js';
+import moment from 'moment';
+import ResignedEmployee from '../models/ResignedEmployee.js';
 const addUserRoutes = express.Router();
 
 // Fetch all roles (MongoDB example)
@@ -16,7 +18,7 @@ addUserRoutes.get('/fetchRole', async (req, res) => {
     // Fetch all roles from the Role model (which maps to the 'roles' collection)
     const roles = await Role.find();
     
-    console.log(roles);
+
     return res.json({
       success: true,
       message: "Roles fetched successfully",
@@ -36,7 +38,6 @@ addUserRoutes.get('/fetchRole', async (req, res) => {
 
 addUserRoutes.get('/getRolePermissions', async (req, res) => {
   const { role_id } = req.query;
-  console.log("Role ID received:", role_id);
 
   // Ensure the role_id is an integer
   const roleIdInt = parseInt(role_id, 10);
@@ -89,7 +90,6 @@ addUserRoutes.get('/fetchDesignation', async (req, res) => {
   console.log("Department ID received:", dept_id);
 
   // Log the data type of dept_id
-  console.log("Data type of dept_id:", typeof dept_id);
 
   if (!dept_id) {
     return res.status(400).json({
@@ -151,12 +151,12 @@ addUserRoutes.get('/fetchDesignation', async (req, res) => {
 
 addUserRoutes.post('/submitUser', async (req, res) => {
   const { empFullName, empPersonalEmail,empConfirmationdate,empofferedCTC, empPhoneNo, empAadhaarNo, empPanCardNo, empDepartment, empDesignation, empJoinDate, empStatus, role, rolePermission, empDob } = req.body;
-   console.log(req.body)
 
-  const last_updated_time = new Date();
-  const last_updated_status = "New";
+
+   const formattedTime = moment().format("YYYY-MM-DD hh:mm A"); // Example: 2025-02-07 12:45 AM
+   const last_updated_status = "New";
   const employement_status= 'Probation';
-  const emp_id=  "NIK" + Math.floor(100000 + Math.random() * 900000); // Generate emp_id for MongoDB
+  // const emp_id=  "NIK" + Math.floor(100000 + Math.random() * 900000); // Generate emp_id for MongoDB
 
   
 
@@ -182,8 +182,8 @@ addUserRoutes.post('/submitUser', async (req, res) => {
     emp_password: null, // Assuming no password in the form
     manager_id: null,
     team_leader_id: null,
-    emp_id:emp_id , // Generated emp_id for future use
-    last_updated_time: last_updated_time,
+    emp_id:null , // Generated emp_id for future use
+    last_updated_time: formattedTime,
     last_updated_status: last_updated_status,
   });
 
@@ -212,37 +212,51 @@ addUserRoutes.get('/getAllEmployees', async (req, res) => {
     const employees = await User.aggregate([
       {
         $lookup: {
-          from: 'departments', // The name of the department collection
-          localField: 'emp_department', // Field in `User` that holds the department reference
-          foreignField: 'dep_id', // Field in `Department` collection that matches
-          as: 'department_details', // The field to store the populated department details
+          from: 'departments',
+          localField: 'emp_department',
+          foreignField: 'dep_id',
+          as: 'department_details',
         },
       },
       {
         $lookup: {
-          from: 'designations', // The name of the designation collection
-          localField: 'emp_designation', // Field in `User` that holds the designation reference
-          foreignField: 'designation_id', // Field in `Designation` collection that matches
-          as: 'designation_details', // The field to store the populated designation details
+          from: 'designations',
+          localField: 'emp_designation',
+          foreignField: 'designation_id',
+          as: 'designation_details',
         },
       },
       {
         $lookup: {
-          from: 'roles', // The name of the role collection
-          localField: 'role_id', // Field in `User` that holds the role reference
-          foreignField: 'role_id', // Field in `Role` collection that matches
-          as: 'role_details', // The field to store the populated role details
+          from: 'roles',
+          localField: 'role_id',
+          foreignField: 'role_id',
+          as: 'role_details',
         },
       },
+      // ✅ Lookup manager name from the master collection (self-reference)
       {
-        $unwind: { path: '$department_details', preserveNullAndEmptyArrays: true }, // Flatten department details
+        $lookup: {
+          from: 'master', // Self-referencing lookup
+          localField: 'manager_id', // Field in this document
+          foreignField: 'emp_id', // Matching field in the master collection
+          as: 'manager_details',
+        },
       },
+      // ✅ Lookup team leader name from the master collection (self-reference)
       {
-        $unwind: { path: '$designation_details', preserveNullAndEmptyArrays: true }, // Flatten designation details
+        $lookup: {
+          from: 'master', // Self-referencing lookup
+          localField: 'team_leader_id', // Field in this document
+          foreignField: 'emp_id', // Matching field in the master collection
+          as: 'teamleader_details',
+        },
       },
-      {
-        $unwind: { path: '$role_details', preserveNullAndEmptyArrays: true }, // Flatten role details
-      },
+      { $unwind: { path: '$department_details', preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: '$designation_details', preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: '$role_details', preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: '$manager_details', preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: '$teamleader_details', preserveNullAndEmptyArrays: true } },
       {
         $project: {
           _id: 1,
@@ -255,13 +269,15 @@ addUserRoutes.get('/getAllEmployees', async (req, res) => {
           role_id: 1,
           emp_email: 1,
           emp_status: 1,
-          department_name: { $ifNull: ['$department_details.dep_name', null] }, // Extract department name
-          designation_name: { $ifNull: ['$designation_details.designation_name', null] }, // Extract designation name
-          role_name: { $ifNull: ['$role_details.role', null] }, // Extract role name
+          department_name: { $ifNull: ['$department_details.dep_name', null] },
+          designation_name: { $ifNull: ['$designation_details.designation_name', null] },
+          role_name: { $ifNull: ['$role_details.role', null] },
           emp_join_date: 1,
           emp_pan_card_no: 1,
-          manager_id: 1,
-          team_leader_id: 1,
+          team_leader_id:1,
+          manager_id:1,
+          manager_name: { $ifNull: ['$manager_details.emp_full_name', null] }, // ✅ Get manager name
+          team_leader_name: { $ifNull: ['$teamleader_details.emp_full_name', null] }, // ✅ Get team leader name
           emp_confirmation_date: 1,
           emp_offered_ctc: 1,
           emp_empstatus: 1,
@@ -294,6 +310,7 @@ addUserRoutes.get('/getAllEmployees', async (req, res) => {
     });
   }
 });
+
 
 // Fetch all roles (MongoDB example)
 
@@ -344,9 +361,8 @@ addUserRoutes.get('/getAllEmployees', async (req, res) => {
 addUserRoutes.put('/updateUserStatus', async (req, res) => {
   let { id, empStatus, empManager, empTeamLeader, workEmail, empPassword } = req.body;
   const last_updated_status = 'Activated';
-  const last_updated_time = new Date();
+  const formattedTime = moment().format("YYYY-MM-DD hh:mm A"); // Example: 2025-02-07 12:45 AM
 
-  console.log("Received id:", id); // Log the id to check its format
 
   // Check if the received id is a valid ObjectId
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -390,7 +406,7 @@ addUserRoutes.put('/updateUserStatus', async (req, res) => {
           emp_email: workEmail,
           emp_password: empPassword,
           last_updated_status: last_updated_status,
-          last_updated_time: last_updated_time,
+          last_updated_time: formattedTime,
           emp_id: newEmpId,
         }
       },
@@ -413,6 +429,33 @@ addUserRoutes.put('/updateUserStatus', async (req, res) => {
   }
 });
 
+addUserRoutes.get("/fetchDesignation", async (req, res) => {
+  const { dept_id } = req.query;
+  console.log(typeof(dept_id));
+
+  if (!dept_id) {
+    return res.status(400).json({
+      success: false,
+      error: "Department ID is required",
+    });
+  }
+
+  try {
+    const designations = await Designation.find({ dept_id });
+    return res.json({
+      success: true,
+      message: "Designations fetched successfully",
+      data: designations,
+    });
+  } catch (error) {
+    console.error("Database error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Failed to fetch designations",
+      details: error.message,
+    });
+  }
+});
 
 
 // addUserRoutes.get('/fetchDesignation/:id', async (req, res) => {
@@ -545,43 +588,45 @@ addUserRoutes.post('/addEducation', async (req, res) => {
 addUserRoutes.get('/getSingleEmployeeBy/:emp', async (req, res) => {
   const { emp } = req.params;
   console.log("Searching for emp_id:", emp);
-
+ 
   try {
     // Find employee details
     const user = await User.findOne({ emp_id: emp });
     console.log("User data:", user);
-
+ 
     if (!user) {
       return res.status(404).json({ message: 'Employee not found' });
     }
-
+ 
     // Fetch department details
     const department = await Department.findOne({ dep_id: user.emp_department });
     console.log("Department data:", department);
-
+ 
     // Fetch designation details
     const designation = await Designation.findOne({ designation_id: user.emp_designation });
     console.log("Designation data:", designation);
-
+ 
     // Find banking details
     const banking = await Banking.findOne({ emp_id: emp });
     console.log("Banking data:", banking);
-
+ 
     // Find education details
     const education = await Education.findOne({ emp_id: emp });
     console.log("Education data:", education);
-
+ 
     // Find personal details
     const personalData = await PersonalInformation.findOne({ emp_id: emp });
     console.log("Personal data:", personalData);
-
+ 
     // Find manager details
     const manager = await User.findOne({ emp_id: user.manager_id });
     console.log("Manager data:", manager);
 
+ 
     // Find team leader details
     const teamLeader = await User.findOne({ emp_id: user.team_leader_id });
     console.log("Team Leader data:", teamLeader);
+ 
 
     // Combine all data into one result
     const result = {
@@ -593,8 +638,9 @@ addUserRoutes.get('/getSingleEmployeeBy/:emp', async (req, res) => {
       personalData,
       manager_name: manager ? manager.emp_full_name : "Not Assigned",
       team_leader_name: teamLeader ? teamLeader.emp_full_name : "Not Assigned",
-    };
 
+    };
+ 
     // Send the response
     res.status(200).json(result);
   } catch (error) {
@@ -603,34 +649,156 @@ addUserRoutes.get('/getSingleEmployeeBy/:emp', async (req, res) => {
   }
 });
 
+
 // Insert personal information from request body
 addUserRoutes.post("/addPersonalInfo", async (req, res) => {
-  try {
-    const personalInfo = new PersonalInformation({
-      permanent_address: req.body.permanent_address,
-      permanent_city: req.body.permanent_city,
-      permanent_state: req.body.permanent_state,
-      permanent_zip_code: req.body.permanent_zip_code,
-      current_address: req.body.current_address,
-      current_city: req.body.current_city,
-      current_state: req.body.current_state,
-      current_zip_code: req.body.current_zip_code,
-      alternate_mob_no: req.body.alternate_mob_no,
-      emergency_person_name: req.body.emergency_person_name,
-      emergency_relationship: req.body.emergency_relationship,
-      emergency_mob_no: req.body.emergency_mob_no,
-      emergency_address: req.body.emergency_address,
-      emp_id: req.body.emp_id,
-      marital_status: req.body.marital_status,
-      blood_group: req.body.blood_group
-    });
 
+
+// Insert personal information from request body
+
+addUserRoutes.post("/addPersonalInformation", async (req, res) => {
+  const {
+    emp_id,
+    permanent_address,
+    permanent_city,
+    permanent_state,
+    permanent_zip_code,
+    current_address,
+    current_city,
+    current_state,
+    current_zip_code,
+    alternate_mob_no,
+    emergency_person_name,
+    emergency_relationship,
+    emergency_mob_no,
+    emergency_address,
+    marital_status,
+    blood_group,
+    account_holder_name,
+    bank_name,
+    account_number,
+    ifsc_code,
+    branch_name,
+    education // Expecting an array from frontend
+  } = req.body;
+
+
+  if (!emp_id) {
+    return res.status(400).json({ message: "Employee ID is required" });
+  }
+
+
+  try {
+    // ✅ Save Personal Information
+    const personalInfo = new PersonalInformation({
+      emp_id,
+      permanent_address,
+      permanent_city,
+      permanent_state,
+      permanent_zip_code,
+      current_address,
+      current_city,
+      current_state,
+      current_zip_code,
+      alternate_mob_no,
+      emergency_person_name,
+      emergency_relationship,
+      emergency_mob_no,
+      emergency_address,
+      marital_status,
+      blood_group
+    });
     await personalInfo.save();
 
-    res.status(201).json({ message: "Personal Information added successfully", personalInfo });
+    // ✅ Save Banking Details (if provided)
+    let savedBanking = null;
+    if (bank_name && account_number && ifsc_code && branch_name) {
+      const newBanking = new Banking({
+        emp_id,
+        account_holder_name,
+        bank_name,
+        account_number,
+        ifsc_code,
+        branch_name
+      });
+      savedBanking = await newBanking.save();
+    }
+
+    // ✅ Save Education Details in an array (Fixing your issue)
+// Save Education Details (if provided)
+if (Array.isArray(education) && education.length > 0) {
+  const validEducation = education.filter(edu => edu.degree && edu.institution && edu.year_of_passing);
+  
+  if (validEducation.length > 0) {
+    await Education.findOneAndUpdate(
+      { emp_id }, // Find by emp_id
+      { $set: { emp_id }, $push: { education: { $each: validEducation } } }, // Append new records
+      { new: true, upsert: true } // Create if not exists
+    );
+  }
+}
+
+    // ✅ Update User Master with last_updated_time in "hh:mm A" format
+    const formattedTime = moment().format("YYYY-MM-DD hh:mm A"); // Example: 2025-02-07 12:45 AM
+
+    await User.findOneAndUpdate(
+      { emp_id: emp_id },
+      {
+        $set: {
+          last_updated_status: "Updated",
+          last_updated_time: formattedTime
+        }
+      },
+      { new: true }
+    );
+
+    res.status(201).json({
+      message: "Personal, Banking, and Education details added successfully, User master updated",
+      personalInfo,
+      bankingDetails: savedBanking
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error adding personal information", error: error.message });
+    console.error("Error inserting data:", error);
+    res.status(500).json({ message: "Server error, try again later", error: error.message });
+  }
+});
+
+
+addUserRoutes.put('/editEmployeeDetails', async (req, res) => {
+  try {
+    const { id, newDesignation, newStatus, newMobileNumber, newTeamLeader, newManager } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ success: false, error: "Employee ID is required" });
+    }
+
+    // Create an object with only provided fields
+    let updateFields = {};
+    if (newStatus) updateFields.emp_empstatus = newStatus;
+    if (newDesignation) updateFields.emp_designation = newDesignation;
+    if (newMobileNumber) updateFields.emp_phone_no = newMobileNumber;
+    if (newTeamLeader) updateFields.team_leader_id = newTeamLeader;
+    if (newManager) updateFields.manager_id = newManager;
+
+    // If no fields to update, return early
+    if (Object.keys(updateFields).length === 0) {
+      return res.status(400).json({ success: false, error: "No valid fields provided for update" });
+    }
+
+    const updatedUser = await User.findOneAndUpdate(
+      { emp_id: id }, // Find user by emp_id
+      { $set: updateFields },
+      { new: true } // Return updated document
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+
+    res.json({ success: true, message: "Employment details updated successfully", user: updatedUser });
+  } catch (error) {
+    console.error("Database error:", error);
+    res.status(500).json({ success: false, error: "Failed to update employment details", details: error.message });
   }
 });
 
@@ -664,6 +832,7 @@ addUserRoutes.put("/updateEmergencyContact/:id", async (req, res) => {
     res.status(500).json({ success: false, error: "Internal server error" });
   }
 });
+
 
 
 
@@ -745,6 +914,65 @@ addUserRoutes.put("/updatePersonalIdentity/:id", async (req, res) => {
   }
 });
 
+
+
+
+addUserRoutes.post("/resigned_employees",async (req, res) => {
+  try {
+    const {
+      emp_id,
+      employee_name,
+      last_working_day,
+      total_work_period,
+      last_ctc_drawn,
+      last_designation,
+      reason_for_resignation,
+      feedback,
+      exit_interview_done,
+      notice_period_served,
+      emp_status,
+      emp_empstatus,
+    } = req.body;
+
+    // Insert into ResignedEmployee collection
+    const resignedEmployee = new ResignedEmployee({
+      emp_id,
+      employee_name,
+      last_working_day,
+      total_work_period,
+      last_ctc_drawn,
+      last_designation,
+      reason_for_resignation,
+      feedback,
+      exit_interview_done,
+      notice_period_served,
+    });
+
+    await resignedEmployee.save();
+
+    // Update Employee status in Employee collection
+    await User.findOneAndUpdate(
+      { emp_id: emp_id },
+      { emp_status: emp_status, emp_empstatus: emp_empstatus }
+    );
+
+    res.status(200).json({ success: true, message: "Resignation details saved successfully" });
+  } catch (error) {
+    console.error("Error saving resignation details:", error);
+    res.status(500).json({ success: false, message: "Database error", error: error.message });
+  }
+});
+
+// Fetch all resigned employees
+addUserRoutes.get('/fetch_resigned_employees',async (req, res) => {
+  try {
+    const resignedEmployees = await ResignedEmployee.find();
+    res.status(200).json(resignedEmployees);
+  } catch (error) {
+    console.error("Error fetching resigned employees:", error);
+    res.status(500).json({ message: "Database error", error: error.message });
+  }
+});
 
 
 export default addUserRoutes;

@@ -225,6 +225,7 @@ function Personaldetails() {
     }
   };
 
+ 
   useEffect(() => {
     if (id) getEmployee();
   }, [id]);
@@ -251,6 +252,7 @@ function Personaldetails() {
   //   }
   // };
 
+
   return (
     <div className="p-4 space-y-6">
       {/* Header Section */}
@@ -274,22 +276,19 @@ function Personaldetails() {
 
           <div>
             <p className="text-gray-500 text-xs">Gender</p>
-            <p className="text-sm">
-              {employee?.user?.emp_gender || "Not Given"}
-            </p>
+
+          
+
+            <p className="text-sm">{employee?.user?.emp_gender || "Not Given"}</p>
           </div>
           <div>
             <p className="text-gray-500 text-xs">Date Of Birth</p>
-            <p className="text-sm">
-              {new Date(employee?.user?.emp_dob).toLocaleDateString() ||
-                "Not Given "}
-            </p>
+            <p className="text-sm">{new Date(employee?.user?.emp_dob).toLocaleDateString() || "Not Given "}</p>
           </div>
           <div>
             <p className="text-gray-500 text-xs">Marital Status</p>
-            <p className="text-sm">
-              {employee?.personalData?.marital_status || "No provided"}
-            </p>
+            <p className="text-sm">{employee?.personalData?.marital_status|| 'No provided'}</p>
+
           </div>
           {masterisModalOpen && (
             <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center">
@@ -398,7 +397,11 @@ function Personaldetails() {
             <div>
               <p className="text-gray-500 text-xs">Blood Group</p>
               <p className="text-sm">
-                {employee.personalData?.blood_group || "Not Provided"}
+
+              
+
+                {employee?.personalData?.blood_group || "Not Provided"}
+
               </p>
             </div>
             <div>
@@ -415,15 +418,15 @@ function Personaldetails() {
             </div>
             <div>
               <p className="text-gray-500 text-xs">Emergency Address</p>
-              <p className="text-sm">
-                {employee?.personalData?.emergency_address || "NA"}
-              </p>
+
+            
+
+              <p className="text-sm">{employee?.personalData?.emergency_address || "NA"}</p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">Emergency Mobile No</p>
-              <p className="text-sm">
-                {employee?.personalData?.emergency_mob_no || "NA"}
-              </p>
+              <p className="text-sm">{employee?.personalData?.emergency_mob_no || "NA"}</p>
+
             </div>
           </div>
           {/* Modal for Editing */}
@@ -535,36 +538,34 @@ function Personaldetails() {
 
         {/* Personal Identity
 Section */}
-        <div>
-          {/* Personal Identity Section */}
-          <div className="flex gap-2 mb-3">
-            <h3 className="text-sm font-medium">Personal Identity</h3>
-            <FaEdit
-              className="text-blue-500 cursor-pointer"
-              onClick={handlePeditClick} // Open modal when clicked
-            />
-          </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <div>
-              <p className="text-gray-500 text-xs">Addhaar</p>
-              <p className="text-sm">
-                {employee?.user?.emp_addhar_no || "Not Provided"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 text-xs">Pan</p>
-              <p className="text-sm">
-                {employee?.user?.emp_pan_card_no || "Not Provided"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 text-xs">Driving Licence</p>
-              <p className="text-sm">
-                {employee?.user?.driving_Licence || "Not Provided"}
-              </p>
-            </div>
-          </div>
+        
+
+<div>
+      {/* Personal Identity Section */}
+      <div className="flex gap-2 mb-3">
+        <h3 className="text-sm font-medium">Personal Identity</h3>
+        <FaEdit
+          className="text-blue-500 cursor-pointer"
+          onClick={handlePeditClick} // Open modal when clicked
+        />
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div>
+          <p className="text-gray-500 text-xs">Addhaar</p>
+          <p className="text-sm">{employee?.user?.emp_addhar_no || "Not Provided"}</p>
+        </div>
+        <div>
+          <p className="text-gray-500 text-xs">Pan</p>
+          <p className="text-sm">{employee?.user?.emp_pan_card_no || "Not Provided"}</p>
+        </div>
+        <div>
+          <p className="text-gray-500 text-xs">Driving Licence</p>
+          <p className="text-sm">{employee?.user?.driving_Licence || "Not Provided"}</p>
+        </div>
+      </div>
+
 
           {/* Modal for Editing Personal Identity */}
           {pisModalOpen && (
@@ -629,33 +630,29 @@ Section */}
 
         {/* Education Section */}
         <div>
-          <h3 className="text-sm font-medium mb-3">Education</h3>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {employee.education.education &&
-            employee.education.education.length > 0 ? (
-              employee.education.education.map((edu, index) => (
-                <div
-                  key={edu._id || index}
-                  className="p-2 border rounded-lg shadow-sm"
-                >
-                  <p className="text-gray-600 text-xs font-semibold">
-                    {edu.degree || "Not Provided"}
-                  </p>
-                  <p className="text-sm text-gray-800">
-                    {edu.institution || "Not Provided"}
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    {edu.year_of_passing || "Not Provided"}
-                  </p>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-gray-600 col-span-2 md:col-span-5 text-center">
-                No Education Details Provided
-              </p>
-            )}
-          </div>
-        </div>
+
+       
+
+  <h3 className="text-sm font-medium mb-3">Education</h3>
+  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+  {employee.education.education && employee.education.education.length > 0 ? (
+    employee.education.education.map((edu, index) => (
+      <div key={edu._id || index} className="p-2 border rounded-lg shadow-sm">
+        <p className="text-gray-600 text-xs font-semibold">{edu.degree || "Not Provided"}</p>
+        <p className="text-sm text-gray-800">{edu.institution || "Not Provided"}</p>
+        <p className="text-sm text-gray-700">{edu.year_of_passing || "Not Provided"}</p>
+      </div>
+    ))
+  ) : (
+    <p className="text-sm text-gray-600 col-span-2 md:col-span-5 text-center">
+      No Education Details Provided
+    </p>
+  )}
+</div>
+
+</div>
+
+
 
         {/* Separator */}
         <hr className="my-6 border-gray-200" />
@@ -666,7 +663,11 @@ Section */}
             <div>
               <p className="text-gray-500 text-xs">Account Holder Name</p>
               <p className="text-sm">
-                {employee.banking?.account_holder_name || "Not Provided"}
+
+               
+
+                {employee.banking?.account_holder_name	 || "Not Provided"}
+
               </p>
             </div>
             <div>
@@ -684,13 +685,18 @@ Section */}
             <div>
               <p className="text-gray-500 text-xs">Account No</p>
               <p className="text-sm">
-                {employee.banking?.account_number || "Not Provided"}
+
+
+                {employee.banking?.account_number|| "Not Provided"}
+
               </p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">IFSC Code</p>
               <p className="text-sm">
+
                 {employee.banking?.ifsc_code || "Not Provided"}
+
               </p>
             </div>
           </div>

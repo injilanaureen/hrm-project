@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema({
   emp_full_name: { type: String, required: true },
   emp_personal_email: { type: String, required: true },
   emp_phone_no: { type: String, required: true },
+  emp_gender:{type: String, required: true},
   emp_addhar_no: { type: String, required: true },
   emp_department: { type: Number, required: true, ref: 'Department' },
   emp_designation: { type: Number, required: true, ref: 'Designation' },
