@@ -555,6 +555,14 @@ addUserRoutes.get('/getSingleEmployeeBy/:emp', async (req, res) => {
       return res.status(404).json({ message: 'Employee not found' });
     }
 
+    // Fetch department details
+    const department = await Department.findOne({ dep_id: user.emp_department });
+    console.log("Department data:", department);
+
+    // Fetch designation details
+    const designation = await Designation.findOne({ designation_id: user.emp_designation });
+    console.log("Designation data:", designation);
+
     // Find banking details
     const banking = await Banking.findOne({ emp_id: emp });
     console.log("Banking data:", banking);
@@ -563,14 +571,26 @@ addUserRoutes.get('/getSingleEmployeeBy/:emp', async (req, res) => {
     const education = await Education.findOne({ emp_id: emp });
     console.log("Education data:", education);
 
+    // Find personal details
     const personalData = await PersonalInformation.findOne({ emp_id: emp });
     console.log("Personal data:", personalData);
+
+    // Find manager details
+    let manager = null;
+    if (user.manager_id) {
+      manager = await User.findOne({ emp_id: user.manager_id }, { emp_full_name: 1 });
+      console.log("Manager data:", manager);
+    }
+
     // Combine all data into one result
     const result = {
       user,
+      department,  // Full department details
+      designation, // Full designation details
       banking,
       education,
-      personalData
+      personalData,
+      manager: manager ? manager.emp_full_name : "Not Assigned"
     };
 
     // Send the response
@@ -580,6 +600,8 @@ addUserRoutes.get('/getSingleEmployeeBy/:emp', async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+
+
 
 
 // Insert personal information from request body
@@ -610,6 +632,37 @@ addUserRoutes.post("/addPersonalInfo", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error adding personal information", error: error.message });
+  }
+});
+
+//updateEmergencyContact
+
+addUserRoutes.put("/updateEmergencyContact/:id", async (req, res) => {
+  try {
+    const { id } = req.params; // Corrected param to match route
+    const { emergency_person_name, emergency_relationship, emergency_address, emergency_mob_no } = req.body;
+
+    const updatedEmployee = await PersonalInformation.findOneAndUpdate(
+      { emp_id: id }, // Find employee by emp_id
+      {
+        $set: {
+          "emergency_person_name": emergency_person_name,
+          "emergency_relationship": emergency_relationship,
+          "emergency_address": emergency_address,
+          "emergency_mob_no": emergency_mob_no,
+        },
+      },
+      { new: true }
+    );
+
+    if (!updatedEmployee) {
+      return res.status(404).json({ success: false, error: "Employee not found" });
+    }
+
+    res.json({ success: true, data: updatedEmployee });
+  } catch (error) {
+    console.error("Error updating emergency contact:", error);
+    res.status(500).json({ success: false, error: "Internal server error" });
   }
 });
 
