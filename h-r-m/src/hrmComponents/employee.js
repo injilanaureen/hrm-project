@@ -11,10 +11,9 @@ import { FolderInput } from 'lucide-react';
 import { EllipsisVertical } from 'lucide-react';
 import { motion } from "framer-motion";
 import EmployeePersonalDetailsForm from "./employementPersonalDetails";
-import UpdateEmploymentStatusModal from "./UpdateEmploymentStatusModal";
 import UpdateResignedEmployeeForm from "./updateResignedEmployeeModal";
 import ResignedEmployees1 from "./resignedEmployeeshr";
-
+import EditEmployeeDetails from './editEmploymeeDetails';
 
 function Employee() {
   const [formData, setFormData] = useState({
@@ -580,7 +579,7 @@ function Employee() {
 
  {/* Employment Status Modal */}
  {employmentStatus && (
-        <UpdateEmploymentStatusModal
+        <EditEmployeeDetails
         selectedEmployee={selectedEmployee}
         setEmployementStatus={setEmployementStatus}/>
         )}

@@ -7,7 +7,6 @@ function Personaldetails() {
   const { id } = useParams();
   console.log(id);
   const [employee, setEmployee] = useState(null);
-  const [employeeEducation, setEmployeeEducation] = useState([]);
   const [modalEmployee, setModalEmployee] = useState({});
   // const [employee, setEmployee] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
@@ -169,18 +168,21 @@ const handleSaveNameMaritalStatus = async () => {
   const getEmployee = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/adduser/getSingleEmployee/${id}`
+        `http://localhost:5000/api/adduser/getSingleEmployeeBy/${id}`
       );
- console.log(response.data.data)
-      if (response.data.success) {
-        setEmployee(response.data.data);
-      } else {
-        console.error("Failed to fetch employee:", response.data.error);
-      }
+      console.log(response.data);
+     
+      setEmployee(response.data);
     } catch (error) {
       console.error("Failed to fetch employee:", error);
     }
   };
+ 
+  useEffect(() => {
+    if (id) getEmployee();
+  }, [id]);
+ 
+  if (!employee) return <div>Loading...</div>;
   // const getEmployeeEducation = async () => {
   //   try {
   //     const response = await axios.get(
@@ -203,14 +205,6 @@ const handleSaveNameMaritalStatus = async () => {
   // };
   
 
-  useEffect(() => {
-    getEmployee();
-  }, [id]);
-
-  // Check if employee data is null or undefined before rendering
-  if (!employee) {
-    return <div>Loading...</div>; // Show loading while data is being fetched
-  }
 
   return (
     <div className="p-4 space-y-6">
@@ -231,20 +225,20 @@ const handleSaveNameMaritalStatus = async () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
             <p className="text-gray-500 text-xs">Full Name</p>
-            <p className="text-sm">{employee.emp_full_name || "User"}</p>
+            <p className="text-sm">{employee?.user?.emp_full_name || "User"}</p>
           </div>
 
           <div>
             <p className="text-gray-500 text-xs">Gender</p>
-            <p className="text-sm">{employee.emp_gender || "Not Given"}</p>
+            <p className="text-sm">{employee?.user?.emp_gender || "Not Given"}</p>
           </div>
           <div>
             <p className="text-gray-500 text-xs">Date Of Birth</p>
-            <p className="text-sm">{new Date(employee.emp_dob).toLocaleDateString() || "Not Given "}</p>
+            <p className="text-sm">{new Date(employee?.user?.emp_dob).toLocaleDateString() || "Not Given "}</p>
           </div>
           <div>
             <p className="text-gray-500 text-xs">Marital Status</p>
-            <p className="text-sm">{employee.personal_information?.[0]?.marital_status || ""}</p>
+            <p className="text-sm">{employee?.personalData?.marital_status|| 'No provided'}</p>
           </div>
           {masterisModalOpen && (
   <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center">
@@ -315,14 +309,14 @@ const handleSaveNameMaritalStatus = async () => {
             <div>
               <p className="text-gray-500 text-xs">Permanent Postal Address</p>
               <p className="text-sm">
-                {`${employee.personal_information?.[0]?.permanent_address} ${employee.personal_information?.[0]?.permanent_city} ${employee.personal_information?.[0]?.permanent_state} ${employee.personal_information?.[0]?.permanent_zip_code} ` ||
+                {`${employee?.personalData?.permanent_address} ${employee?.personalData?.permanent_city} ${employee?.personalData?.permanent_state} ${employee?.personalData?.permanent_zip_code} ` ||
                   "Not provided"}
               </p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">Present Postal Address</p>
               <p className="text-sm">
-                {`${employee.personal_information?.[0]?.current_address} ${employee.personal_information?.[0]?.current_city} ${employee.personal_information?.[0]?.current_state} ${employee.personal_information?.[0]?.personal_information?.[0]?.current_zip_code} ` ||
+                {`${employee?.personalData?.current_address} ${employee?.personalData?.current_city} ${employee?.personalData?.current_state} ${employee?.personalData?.current_zip_code} ` ||
                   "Not provided"}
               </p>
             </div>
@@ -345,28 +339,28 @@ const handleSaveNameMaritalStatus = async () => {
             <div>
               <p className="text-gray-500 text-xs">Blood Group</p>
               <p className="text-sm">
-                {employee.personal_information?.[0]?.blood_group || "Not Provided"}
+                {employee?.personalData?.blood_group || "Not Provided"}
               </p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">Emergency Contact Name</p>
               <p className="text-sm">
-                {employee.personal_information?.[0]?.emergency_person_name || "NA"}
+                {employee?.personalData?.emergency_person_name || "NA"}
               </p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">Relationship</p>
               <p className="text-sm">
-                {employee.personal_information?.[0]?.emergency_relationship || "NA"}
+                {employee?.personalData?.emergency_relationship || "NA"}
               </p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">Emergency Address</p>
-              <p className="text-sm">{employee.personal_information?.[0]?.emergency_address || "NA"}</p>
+              <p className="text-sm">{employee?.personalData?.emergency_address || "NA"}</p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">Emergency Mobile No</p>
-              <p className="text-sm">{employee.personal_information?.[0]?.emergency_mob_no || "NA"}</p>
+              <p className="text-sm">{employee?.personalData?.emergency_mob_no || "NA"}</p>
             </div>
           </div>
           {/* Modal for Editing */}
@@ -475,15 +469,15 @@ Section */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div>
           <p className="text-gray-500 text-xs">Addhaar</p>
-          <p className="text-sm">{employee.emp_addhar_no || "Not Provided"}</p>
+          <p className="text-sm">{employee?.user?.emp_addhar_no || "Not Provided"}</p>
         </div>
         <div>
           <p className="text-gray-500 text-xs">Pan</p>
-          <p className="text-sm">{employee.emp_pan_card_no || "Not Provided"}</p>
+          <p className="text-sm">{employee?.user?.emp_pan_card_no || "Not Provided"}</p>
         </div>
         <div>
           <p className="text-gray-500 text-xs">Driving Licence</p>
-          <p className="text-sm">{employee.driving_Licence || "Not Provided"}</p>
+          <p className="text-sm">{employee?.user?.driving_Licence || "Not Provided"}</p>
         </div>
       </div>
 
@@ -568,18 +562,21 @@ Section */}
         <div>
   <h3 className="text-sm font-medium mb-3">Education</h3>
   <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-    {employee.educational_background?.length > 0 ? (
-      employee.educational_background?.map((edu, index) => (
-        <div key={edu._id || index} className="p-2 border rounded-lg shadow-sm">
-          <p className="text-gray-500 text-xs font-semibold">{edu.degree || "Not Provided"}</p>
-          <p className="text-sm text-gray-700">{edu.institution || "Not Provided"}</p>
-          <p className="text-sm text-gray-500">{edu.year_of_passing || "Not Provided"}</p>
-        </div>
-      ))
-    ) : (
-      <p className="text-sm text-gray-600">No Education Details Provided</p>
-    )}
-  </div>
+  {employee.education.education && employee.education.education.length > 0 ? (
+    employee.education.education.map((edu, index) => (
+      <div key={edu._id || index} className="p-2 border rounded-lg shadow-sm">
+        <p className="text-gray-600 text-xs font-semibold">{edu.degree || "Not Provided"}</p>
+        <p className="text-sm text-gray-800">{edu.institution || "Not Provided"}</p>
+        <p className="text-sm text-gray-700">{edu.year_of_passing || "Not Provided"}</p>
+      </div>
+    ))
+  ) : (
+    <p className="text-sm text-gray-600 col-span-2 md:col-span-5 text-center">
+      No Education Details Provided
+    </p>
+  )}
+</div>
+
 </div>
 
 
@@ -592,31 +589,31 @@ Section */}
             <div>
               <p className="text-gray-500 text-xs">Account Holder Name</p>
               <p className="text-sm">
-                {employee.bank_details?.[0]?.account_holder_name	 || "Not Provided"}
+                {employee.banking?.account_holder_name	 || "Not Provided"}
               </p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">Bank Name</p>
               <p className="text-sm">
-                {employee.bank_details?.[0]?.bank_name || "Not Provided"}
+                {employee.banking?.bank_name || "Not Provided"}
               </p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">Branch Name </p>
               <p className="text-sm">
-                {employee.bank_details?.[0]?.branch_name || "Not Provided"}
+                {employee.banking?.branch_name || "Not Provided"}
               </p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">Account No</p>
               <p className="text-sm">
-                {employee.bank_details?.[0]?.account_no || "Not Provided"}
+                {employee.banking?.account_number|| "Not Provided"}
               </p>
             </div>
             <div>
               <p className="text-gray-500 text-xs">IFSC Code</p>
               <p className="text-sm">
-                {employee.bank_details?.[0]?.IFSC_code	 || "Not Provided"}
+                {employee.banking?.ifsc_code	 || "Not Provided"}
               </p>
             </div>
           </div>

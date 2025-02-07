@@ -2,7 +2,7 @@ import { useState,useEffect
  } from "react";
 import axios from "axios";
 
-const UpdateEmploymentStatusModal = ({ selectedEmployee, setEmployementStatus }) => {
+const EditEmployeeDetails = ({ selectedEmployee, setEmployementStatus }) => {
   const [updatedData, setUpdatedData] = useState({
     newDesignation: "",
     newStatus: "",
@@ -51,13 +51,13 @@ const UpdateEmploymentStatusModal = ({ selectedEmployee, setEmployementStatus })
     }
   };
 
-  const handleUpdateEmploymentStatus = async (e) => {
+  const handleEitEmploymeeDetails = async (e) => {
 e.preventDefault();
     if (!selectedEmployee) return;
 
     try {
-      const response = await axios.put("http://localhost:5000/api/adduser/updateEmploymentStatus", {
-        id: selectedEmployee.id,
+      const response = await axios.put("http://localhost:5000/api/adduser/editEmployeeDetails", {
+        id: selectedEmployee.emp_id,
         newDesignation: updatedData.newDesignation,
         newStatus: updatedData.newStatus,
         newMobileNumber: updatedData.newMobileNumber,
@@ -85,7 +85,7 @@ e.preventDefault();
     <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center">
       <div className="bg-white p-8 rounded-md w-3/4 md:w-1/2 lg:w-1/3">
         <h2 className="text-lg mb-4 font-semibold">Edit Employee Details</h2>
-        <form onSubmit={handleUpdateEmploymentStatus}>
+        <form onSubmit={handleEitEmploymeeDetails}>
           
           {/* Update Employment Status */}
           <div className="mb-4">
@@ -132,35 +132,39 @@ e.preventDefault();
 
           {/* Update Team Leader */}
           <div className="mb-4">
-            <label className="block mb-1">Assign Team Leader</label>
-            <select
-            name="newTeamLeader"
-            value={updatedData.newTeamLeader}
-            onChange={(e) => setUpdatedData({ ...updatedData, newTeamLeader: e.target.value })}
-            className="w-full p-2 border border-gray-300 rounded-md text-sm"
-          >
-            <option value="" disabled>Select Team leader</option> {/* Empty option for the first value */}
-            {teamLeaderList.map(leader => (
-              <option key={leader.id} value={leader.id}>{leader.emp_full_name}</option>
-            ))}
-          </select>
-          </div>
+  <label className="block text-sm">Change Manager</label>
+  <select
+    name="empManager"
+    value={updatedData.newManager}
 
-          {/* Update Manager */}
-          <div className="mb-4">
-            <label className="block mb-1">Assign Manager</label>
-            <select
-            name="newManager"
-            value={updatedData.newManager}
-            onChange={(e) => setUpdatedData({ ...updatedData, newManager: e.target.value })}
-            className="w-full p-2 border border-gray-300 rounded-md text-sm"
-          >
-            <option value="" disabled>Select Manager</option> {/* Empty option for the first value */}
-            {managerList.map(manager => (
-              <option key={manager.id} value={manager.id}>{manager.emp_full_name}</option>
-            ))}
-          </select>
-          </div>
+    className="w-full p-2 border border-gray-300 rounded-md text-sm"
+  >
+    <option value="" disabled>Select Manager</option> {/* Empty option for the first value */}
+    {managerList
+      .filter(manager => manager.emp_id !== selectedEmployee.emp_id) // Exclude the current user
+      .map(manager => (
+        <option key={manager.emp_id} value={manager.emp_id}>{manager.emp_full_name || 'No Manager Availble'}</option>
+      ))}
+  </select>
+</div>
+
+<div className="mb-4">
+  <label className="block text-sm">ChangeTeam Leader</label>
+  <select
+    name="empTeamLeader"
+    value={updatedData.newTeamLeader}
+
+    className="w-full p-2 border border-gray-300 rounded-md text-sm"
+  >
+    <option value="" disabled>Select Team Leader</option> {/* Empty option for the first value */}
+    {teamLeaderList
+      .filter(leader => leader.emp_id !== selectedEmployee.emp_id) // Exclude the current user
+      .map(leader => (
+        <option key={leader.emp_id} value={leader.emp_id}>{leader.emp_full_name || 'No Team Leader Available'}</option>
+      ))}
+  </select>
+id</div>
+
 
           <div className="flex justify-end gap-2">
             <button type="button" className="px-4 py-2 bg-gray-400 text-white rounded" onClick={() => setEmployementStatus(false)}>
@@ -176,4 +180,4 @@ e.preventDefault();
   );
 };
 
-export default UpdateEmploymentStatusModal;
+export default EditEmployeeDetails;
