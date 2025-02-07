@@ -172,14 +172,14 @@ function EmployeeOverview() {
     <div className="flex flex-col items-center">
       <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-xs mb-1 border-2 border-gray-300">
         {
-          (employee?.user?.manager_name || "") // Ensure it's a string
+          (employee?.manager_name || "") // Ensure it's a string
             .split(" ")
             .map((namePart) => namePart.charAt(0).toUpperCase())
             .join("")
         }
       </div>
       <div className="text-center">
-        <p className="text-xs font-medium">{employee?.user?.manager_name || "N/A"}</p>
+        <p className="text-xs font-medium">{employee?.manager_name || "N/A"}</p>
         <p className="text-xs text-gray-500">Project Manager</p>
       </div>
       <div className="h-8 w-px bg-gray-300 my-2"></div>
@@ -188,14 +188,14 @@ function EmployeeOverview() {
     <div className="flex flex-col items-center">
       <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-xs mb-1 border-2 border-gray-300">
         {
-          (employee?.user?.team_leader_name || "")
+          (employee?.team_leader_name|| "")
             .split(" ")
             .map((namePart) => namePart.charAt(0).toUpperCase())
             .join("")
         }
       </div>
       <div className="text-center">
-        <p className="text-xs font-medium">{employee?.user?.team_leader_name || "N/A"}</p>
+        <p className="text-xs font-medium">{employee?.team_leader_name || "N/A"}</p>
         <p className="text-xs text-gray-500">Team Leader</p>
       </div>
       <div className="h-8 w-px bg-gray-300 my-2"></div>
