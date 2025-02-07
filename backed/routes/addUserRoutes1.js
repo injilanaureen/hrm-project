@@ -651,7 +651,7 @@ addUserRoutes.get('/getSingleEmployeeBy/:emp', async (req, res) => {
 
 
 // Insert personal information from request body
-addUserRoutes.post("/addPersonalInfo", async (req, res) => {
+addUserRoutes.post("/addPersonalInfo", async (req, res) => {});
 
 
 // Insert personal information from request body
