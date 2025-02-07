@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import axios from "axios"; 
+
+import axios from "axios";
+
 import { ArrowLeft } from "lucide-react";
 function EmployeeOverview() {
-  const { id } = useParams(); 
+  const { id } = useParams();
   console.log(id);
-  const [employee, setEmployee] = useState(null); 
-
+  const [employee, setEmployee] = useState(null);
+ 
   const getEmployee = async () => {
     try {
       const response = await axios.get(
@@ -25,7 +27,7 @@ function EmployeeOverview() {
   }, [id]);
  
   if (!employee) return <div>Loading...</div>;
-
+ 
   return (
     <div className="p-4 space-y-6">
       {/* Header Section */}
@@ -172,14 +174,22 @@ function EmployeeOverview() {
     <div className="flex flex-col items-center">
       <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-xs mb-1 border-2 border-gray-300">
         {
+
+         
+
           (employee?.manager_name || "") // Ensure it's a string
+
             .split(" ")
             .map((namePart) => namePart.charAt(0).toUpperCase())
             .join("")
         }
       </div>
       <div className="text-center">
+
+       
+
         <p className="text-xs font-medium">{employee?.manager_name || "N/A"}</p>
+
         <p className="text-xs text-gray-500">Project Manager</p>
       </div>
       <div className="h-8 w-px bg-gray-300 my-2"></div>
@@ -188,14 +198,21 @@ function EmployeeOverview() {
     <div className="flex flex-col items-center">
       <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-xs mb-1 border-2 border-gray-300">
         {
+
+       
+
           (employee?.team_leader_name|| "")
+
             .split(" ")
             .map((namePart) => namePart.charAt(0).toUpperCase())
             .join("")
         }
       </div>
       <div className="text-center">
+
+
         <p className="text-xs font-medium">{employee?.team_leader_name || "N/A"}</p>
+
         <p className="text-xs text-gray-500">Team Leader</p>
       </div>
       <div className="h-8 w-px bg-gray-300 my-2"></div>
@@ -226,7 +243,7 @@ function EmployeeOverview() {
     </div>
   );
 }
- 
-
 
 export default EmployeeOverview;
+ 
+ 
