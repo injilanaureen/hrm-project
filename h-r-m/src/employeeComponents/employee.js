@@ -44,7 +44,9 @@ function Employee() {
 
   if (!employee) return <div>Loading...</div>;
 
-    
+  const fullName = employee?.user?.emp_full_name || "";
+  const nameParts = fullName.split(" ");
+ 
   const firstName = nameParts[0] || "NA";
   const middleName = nameParts.length > 2 ? nameParts[1] : "N/A"; // Middle name is only assigned if there are more than two parts
   const lastName = nameParts.length > 2 ? nameParts[2] : nameParts[1] || "NA"; // If only two parts, assign the second as the last name
@@ -66,9 +68,7 @@ function Employee() {
               VIEW PERSONAL DETAILS
             </button>
           </Link>
-          <button className="bg-purple-500 text-white px-3 py-1.5 rounded text-sm">
-            DOWNLOAD
-          </button>
+          
 
           {/* forget button  */}
           {/* <button className="bg-indigo-400 text-white px-3 py-1.5 rounded text-sm" onClick={() => setShowPasswordModal(true)}>
@@ -181,32 +181,34 @@ function Employee() {
   <div className="flex flex-col items-center">
   <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-xs mb-1 border-2 border-gray-300">
     {
-      (employee?.manager_name || "N/A") // Ensure it's a string
+      (employee?.manager?.name || "N/A") // Ensure it's a string
         .split(" ")
         .map((namePart) => namePart.charAt(0).toUpperCase())
         .join("")
     }
   </div>
   <div className="text-center">
-    <p className="text-xs font-medium">{employee?.manager_name|| "N/A"}</p>
-    <p className="text-xs text-gray-500">Project Manager</p>
+    <p className="text-xs font-medium">{employee?.manager?.name|| "N/A"}</p>
+    <p className="text-xs text-gray-500">{employee?.manager?.designation}</p>
   </div>
-  <div className="h-8 w-px bg-gray-300 my-2"></div>
+  <div className="h-8 w-px bg-gray-300 my-2">
+
+  </div>
 </div>
 
 
     <div className="flex flex-col items-center">
       <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-xs mb-1 border-2 border-gray-300">
         {
-          (employee?.team_leader_name|| "") 
+          (employee?.teamLeader?.name|| "") 
             .split(" ")
             .map((namePart) => namePart.charAt(0).toUpperCase())
             .join("")
         }
       </div>
       <div className="text-center">
-        <p className="text-xs font-medium">{employee?.team_leader_name || "N/A"}</p>
-        <p className="text-xs text-gray-500">Team Leader</p>
+        <p className="text-xs font-medium">{employee?.teamLeader?.name || "N/A"}</p>
+        <p className="text-xs text-gray-500">{employee?.teamLeader?.designation}</p>
       </div>
       <div className="h-8 w-px bg-gray-300 my-2"></div>
     </div>

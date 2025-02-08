@@ -213,59 +213,47 @@ function EmployeeOverview() {
         <div>
   <h3 className="text-sm font-medium mb-6">Organization Chart</h3>
   <div className="relative">
+  <div className="flex flex-col items-center">
+  <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-xs mb-1 border-2 border-gray-300">
+    {
+      (employee?.manager?.name || "N/A") // Ensure it's a string
+        .split(" ")
+        .map((namePart) => namePart.charAt(0).toUpperCase())
+        .join("")
+    }
+  </div>
+  <div className="text-center">
+    <p className="text-xs font-medium">{employee?.manager?.name|| "N/A"}</p>
+    <p className="text-xs text-gray-500">{employee?.manager?.designation}</p>
+  </div>
+  <div className="h-8 w-px bg-gray-300 my-2">
+
+  </div>
+</div>
+
+
     <div className="flex flex-col items-center">
       <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-xs mb-1 border-2 border-gray-300">
         {
-
-         
-
-          (employee?.manager_name || "") // Ensure it's a string
-
+          (employee?.teamLeader?.name|| "") 
             .split(" ")
             .map((namePart) => namePart.charAt(0).toUpperCase())
             .join("")
         }
       </div>
       <div className="text-center">
-
-       
-
-        <p className="text-xs font-medium">{employee?.manager_name || "N/A"}</p>
-
-        <p className="text-xs text-gray-500">Project Manager</p>
+        <p className="text-xs font-medium">{employee?.teamLeader?.name || "N/A"}</p>
+        <p className="text-xs text-gray-500">{employee?.teamLeader?.designation}</p>
       </div>
       <div className="h-8 w-px bg-gray-300 my-2"></div>
     </div>
- 
-    <div className="flex flex-col items-center">
-      <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-xs mb-1 border-2 border-gray-300">
-        {
 
-       
-
-          (employee?.team_leader_name|| "")
-
-            .split(" ")
-            .map((namePart) => namePart.charAt(0).toUpperCase())
-            .join("")
-        }
-      </div>
-      <div className="text-center">
-
-
-        <p className="text-xs font-medium">{employee?.team_leader_name || "N/A"}</p>
-
-        <p className="text-xs text-gray-500">Team Leader</p>
-      </div>
-      <div className="h-8 w-px bg-gray-300 my-2"></div>
-    </div>
- 
     {/* Current Employee */}
     <div className="flex justify-center">
       <div className="flex bg-indigo-600 p-6 gap-3 items-center rounded-lg shadow-lg shadow-sky-400/50">
         <div className="w-10 h-10 rounded-full flex items-center justify-center text-xs text-white border-2 mb-1">
           {
-            (employee?.user?.emp_full_name || "")
+            (employee?.user?.emp_full_name || "") 
               .split(" ")
               .map((namePart) => namePart.charAt(0).toUpperCase())
               .join("")
