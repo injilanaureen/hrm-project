@@ -190,6 +190,45 @@ console.log(user);
   }
 });
 
+authRouter.put('/updateUserPassword', async (req, res) => {
+  try {
+      const { empId, oldPassword, newPassword } = req.body;
+
+      // Input validation
+      if (!empId || !oldPassword || !newPassword) {
+          return res.status(400).json({
+              success: false,
+              message: 'All fields are required'
+          });
+      }
+
+      // Find user by empId and check old password
+      const user = await User.findOne({ emp_id: empId, emp_password: oldPassword });
+
+      if (!user) {
+          return res.status(401).json({
+              success: false,
+              message: 'Invalid current password'
+          });
+      }
+
+      // Update password
+      user.emp_password = newPassword;
+      await user.save();
+
+      return res.status(200).json({
+          success: true,
+          message: 'Password updated successfully'
+      });
+
+  } catch (error) {
+      console.error('Error updating password:', error);
+      return res.status(500).json({
+          success: false,
+          message: 'Server error'
+      });
+  }
+});
 export default authRouter;
 
 

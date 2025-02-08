@@ -23,7 +23,7 @@ import Policies from '../employeeComponents/policies';
 import BlueBox from '../employeeComponents/blueBox';
 import Login from '../Login';
 import EditPersonalDetails from '../employeeComponents/editpersonaldetails';
-import ChangePassword from '../employeeComponents/changePassword';
+import ChangePassword from '../changePassword';
 const EmployeeRouters = () => {
   return (
   

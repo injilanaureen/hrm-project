@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "./context/AuthContext";
 
 function ChangePassword() {
     const { user } = useAuth();
@@ -22,25 +22,25 @@ function ChangePassword() {
       try {
           // Basic validation
           if (oldPassword.trim() === "") {
-              toast.error("Old password is required!");
+              alert("Old password is required!");
               return;
           }
           if (newPassword.trim() === "") {
-              toast.error("New password is required!");
+              alert("New password is required!");
               return;
           }
           if (confirmPassword.trim() === "") {
-              toast.error("Confirm password is required!");
+              alert("Confirm password is required!");
               return;
           }
   
           // Password requirements validation
           if (newPassword.length < 8) {
-              toast.error("New password must be at least 8 characters long!");
+              alert("New password must be at least 8 characters long!");
               return;
           }
           if (newPassword !== confirmPassword) {
-              toast.error("New password and confirm password do not match!");
+              alert("New password and confirm password do not match!");
               return;
           }
   
@@ -76,7 +76,7 @@ function ChangePassword() {
   };
     return (
         <div className="p-6 max-w-md mx-auto">
-            <h2 className="text-2xl font-bold mb-6">Reset Password</h2>
+            <h2 className="text-2xl font-bold mb-6">Change Password</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
                 {error && <div className="text-red-500 mb-4">{error}</div>}
                 {success && <div className="text-green-500 mb-4">{success}</div>}
@@ -137,7 +137,7 @@ function ChangePassword() {
                     className={`w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={loading}
                 >
-                    {loading ? 'Updating...' : 'Reset Password'}
+                    {loading ? 'Updating...' : 'Change Password'}
                 </button>
             </form>
         </div>
