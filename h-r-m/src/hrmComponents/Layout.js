@@ -1,18 +1,49 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, Outlet } from "react-router-dom";
 import { FiSearch, FiBell, FiX } from "react-icons/fi";
-import { SquareMenu } from 'lucide-react';
+import { SquareMenu } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
+import { useNavigate } from 'react-router-dom';
 const Layout = () => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const searchInputRef = useRef(null); // Ref to focus the search input
   const searchModalRef = useRef(null); // Ref to detect clicks outside the search modal
   const notificationsRef = useRef(null); // Ref to detect clicks outside the notifications dropdown
+  const [open, setOpen] = useState(false); // State for dropdown
+  const dropdownRef = useRef(null); // Ref for detecting outside clicks
+  const { user } = useAuth();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    logout();
+    navigate('/login'); // Redirect to login page after logout
+  };
+  // Function to handle clicks outside the dropdown
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    }
 
+    // Add event listener
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      // Remove event listener on unmount
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   const notifications = [
     { id: 1, text: "New employee added", time: "5m ago", isNew: true },
-    { id: 2, text: "Attendance marked for today", time: "10m ago", isNew: true },
+    {
+      id: 2,
+      text: "Attendance marked for today",
+      time: "10m ago",
+      isNew: true,
+    },
     { id: 3, text: "Leave request approved", time: "1h ago", isNew: true },
   ];
   const newNotifications = notifications.filter((n) => n.isNew);
@@ -35,7 +66,10 @@ const Layout = () => {
   // Close the search modal when clicking outside the modal
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (searchModalRef.current && !searchModalRef.current.contains(event.target)) {
+      if (
+        searchModalRef.current &&
+        !searchModalRef.current.contains(event.target)
+      ) {
         setIsSearchOpen(false); // Close search if clicked outside
       }
     };
@@ -46,7 +80,10 @@ const Layout = () => {
   // Close the notifications dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+      if (
+        notificationsRef.current &&
+        !notificationsRef.current.contains(event.target)
+      ) {
         setIsNotificationsOpen(false); // Close notifications if clicked outside
       }
     };
@@ -61,9 +98,12 @@ const Layout = () => {
         <div className="container mx-auto">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link to="/" className="text-xl flex gap-2 items-center font-bold text-white">
-            <SquareMenu/>
-             <p>HRM Dashboard</p> 
+            <Link
+              to="/"
+              className="text-xl flex gap-2 items-center font-bold text-white"
+            >
+              <SquareMenu />
+              <p>HR Dashboard</p>
             </Link>
 
             {/* Search and Notifications */}
@@ -83,13 +123,19 @@ const Layout = () => {
                   placeholder="Search employees or departments..."
                   className="w-64 px-4 py-2 pl-10 rounded-lg bg-gray-50 border focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300"
                 />
-                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                <FiSearch
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  size={18}
+                />
               </div>
 
               {/* Mobile Search Input (Appears when toggled) */}
               {isSearchOpen && (
                 <div className="fixed inset-0 z-30 bg-black bg-opacity-50 flex items-start justify-center pt-6">
-                  <div ref={searchModalRef} className="relative bg-white w-full max-w-md mx-auto p-4 rounded-lg shadow-lg">
+                  <div
+                    ref={searchModalRef}
+                    className="relative bg-white w-full max-w-md mx-auto p-4 rounded-lg shadow-lg"
+                  >
                     {/* Cancel Button */}
                     <button
                       onClick={handleSearchCancel}
@@ -129,40 +175,90 @@ const Layout = () => {
                   <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg">
                     {newNotifications.length > 0 ? (
                       <>
-                        <p className="px-4 py-2 text-sm text-blue-600 font-semibold border-b">New Notifications</p>
+                        <p className="px-4 py-2 text-sm text-blue-600 font-semibold border-b">
+                          New Notifications
+                        </p>
                         <ul className="py-2">
                           {newNotifications.map((notification) => (
                             <li
                               key={notification.id}
                               className="px-4 py-2 bg-blue-50 hover:bg-gray-100"
                             >
-                              <p className="text-sm font-medium">{notification.text}</p>
-                              <p className="text-xs text-gray-400">{notification.time}</p>
+                              <p className="text-sm font-medium">
+                                {notification.text}
+                              </p>
+                              <p className="text-xs text-gray-400">
+                                {notification.time}
+                              </p>
                             </li>
                           ))}
                         </ul>
                       </>
                     ) : oldNotifications.length > 0 ? (
                       <>
-                        <p className="px-4 py-2 text-sm text-gray-600 font-semibold border-b">Earlier Notifications</p>
+                        <p className="px-4 py-2 text-sm text-gray-600 font-semibold border-b">
+                          Earlier Notifications
+                        </p>
                         <ul className="py-2">
                           {oldNotifications.map((notification) => (
                             <li
                               key={notification.id}
                               className="px-4 py-2 hover:bg-gray-100"
                             >
-                              <p className="text-sm font-medium">{notification.text}</p>
-                              <p className="text-xs text-gray-400">{notification.time}</p>
+                              <p className="text-sm font-medium">
+                                {notification.text}
+                              </p>
+                              <p className="text-xs text-gray-400">
+                                {notification.time}
+                              </p>
                             </li>
                           ))}
                         </ul>
                       </>
                     ) : (
-                      <p className="px-4 py-2 text-sm text-gray-400">No notifications available.</p>
+                      <p className="px-4 py-2 text-sm text-gray-400">
+                        No notifications available.
+                      </p>
                     )}
                   </div>
                 )}
               </div>
+
+
+              <div className="relative" ref={dropdownRef}>
+                <div
+                  className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-xs mb-1 border-2 border-gray-300 cursor-pointer"
+                  onClick={() => setOpen(!open)}
+                >
+                  {
+                    user.emp_full_name.split(" ")
+                      .map((namePart) => namePart.charAt(0).toUpperCase())
+                      .join("")}
+                </div>
+
+                {open && (
+                  <div className="absolute top-12 right-0 w-auto h-auto bg-white border rounded-lg shadow-md p-2">
+                    <p className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer rounded">
+                    <Link to={`/employeeoverview/${user.emp_id}`} className="w-full">                        Profile
+                      </Link>
+                    </p>
+
+                    <p className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer rounded">
+                      <Link to="/changepassword" className="w-full">
+                        Change Password
+                      </Link>
+                    </p>
+                    <p
+      onClick={handleLogout}
+      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer p-1 rounded transition-colors"
+    >
+      Logout
+    </p>
+                  </div>
+                )}
+              </div>
+
+
             </div>
           </div>
         </div>
