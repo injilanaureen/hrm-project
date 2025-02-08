@@ -24,7 +24,7 @@ import BlueBox from '../hrmComponents/blueBox';
 
 import EmployeeOverview from '../hrmComponents/employeeOverview';
 import Personaldetails from '../hrmComponents/personalDetails';
-
+import ChangePassword from '../changePassword';
 
 
 const HrmRouters = () => {
@@ -55,6 +55,7 @@ const HrmRouters = () => {
 
           <Route path="employeeoverview/:id" element={<EmployeeOverview />} />
           <Route path="personaldetails/:id" element={<Personaldetails />} />
+          <Route path="changepassword" element={<ChangePassword />} />
 
 
         </Route>
