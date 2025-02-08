@@ -588,45 +588,59 @@ addUserRoutes.post('/addEducation', async (req, res) => {
 addUserRoutes.get('/getSingleEmployeeBy/:emp', async (req, res) => {
   const { emp } = req.params;
   console.log("Searching for emp_id:", emp);
- 
+
   try {
     // Find employee details
     const user = await User.findOne({ emp_id: emp });
     console.log("User data:", user);
- 
+
     if (!user) {
       return res.status(404).json({ message: 'Employee not found' });
     }
- 
+
     // Fetch department details
     const department = await Department.findOne({ dep_id: user.emp_department });
     console.log("Department data:", department);
- 
+
     // Fetch designation details
     const designation = await Designation.findOne({ designation_id: user.emp_designation });
     console.log("Designation data:", designation);
- 
+
     // Find banking details
     const banking = await Banking.findOne({ emp_id: emp });
     console.log("Banking data:", banking);
- 
+
     // Find education details
     const education = await Education.findOne({ emp_id: emp });
     console.log("Education data:", education);
- 
+
     // Find personal details
     const personalData = await PersonalInformation.findOne({ emp_id: emp });
     console.log("Personal data:", personalData);
- 
+
     // Find manager details
     const manager = await User.findOne({ emp_id: user.manager_id });
     console.log("Manager data:", manager);
 
- 
+    let managerDepartment = null;
+    let managerDesignation = null;
+
+    if (manager) {
+      managerDepartment = await Department.findOne({ dep_id: manager.emp_department });
+      managerDesignation = await Designation.findOne({ designation_id: manager.emp_designation });
+    }
+
     // Find team leader details
     const teamLeader = await User.findOne({ emp_id: user.team_leader_id });
     console.log("Team Leader data:", teamLeader);
- 
+
+    let teamLeaderDepartment = null;
+    let teamLeaderDesignation = null;
+
+    if (teamLeader) {
+      teamLeaderDepartment = await Department.findOne({ dep_id: teamLeader.emp_department });
+      teamLeaderDesignation = await Designation.findOne({ designation_id: teamLeader.emp_designation });
+    }
 
     // Combine all data into one result
     const result = {
@@ -636,11 +650,22 @@ addUserRoutes.get('/getSingleEmployeeBy/:emp', async (req, res) => {
       banking,
       education,
       personalData,
-      manager_name: manager ? manager.emp_full_name : "Not Assigned",
-      team_leader_name: teamLeader ? teamLeader.emp_full_name : "Not Assigned",
-
+      manager: manager
+        ? {
+            name: manager.emp_full_name,
+            department: managerDepartment ? managerDepartment.dep_name : "Not Assigned",
+            designation: managerDesignation ? managerDesignation.designation_name : "Not Assigned",
+          }
+        : "Not Assigned",
+      teamLeader: teamLeader
+        ? {
+            name: teamLeader.emp_full_name,
+            department: teamLeaderDepartment ? teamLeaderDepartment.dep_name : "Not Assigned",
+            designation: teamLeaderDesignation ? teamLeaderDesignation.designation_name : "Not Assigned",
+          }
+        : "Not Assigned",
     };
- 
+
     // Send the response
     res.status(200).json(result);
   } catch (error) {
@@ -648,6 +673,7 @@ addUserRoutes.get('/getSingleEmployeeBy/:emp', async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+
 
 
 // Insert personal information from request body
