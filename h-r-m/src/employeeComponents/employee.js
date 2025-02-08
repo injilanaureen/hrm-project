@@ -44,6 +44,11 @@ function Employee() {
 
   if (!employee) return <div>Loading...</div>;
 
+    
+  const firstName = nameParts[0] || "NA";
+  const middleName = nameParts.length > 2 ? nameParts[1] : "N/A"; // Middle name is only assigned if there are more than two parts
+  const lastName = nameParts.length > 2 ? nameParts[2] : nameParts[1] || "NA"; // If only two parts, assign the second as the last name
+
   return (
     <div className="p-4 space-y-6">
       {/* Header Section */}
@@ -134,32 +139,18 @@ function Employee() {
         <div>
           <h3 className="text-sm font-medium mb-3">Biographical</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <p className="text-gray-500 text-xs">First Name</p>
-              <p className="text-sm">
-                {" "}
-                {employee?.user?.emp_full_name
-                  ? employee?.user?.emp_full_name.split(" ")[0]
-                  : "NA"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 text-xs">Middle Name</p>
-              <p className="text-sm">
-                {" "}
-                {employee?.user?.emp_full_name
-                  ? employee?.user?.emp_full_name.split(" ")[1] || "NA"
-                  : "NA"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 text-xs">Last Name</p>
-              <p className="text-sm">
-                {employee?.user?.emp_full_name
-                  ? employee?.user?.emp_full_name.split(" ")[2] || "NA"
-                  : "NA"}
-              </p>
-            </div>
+          <div>
+  <p className="text-gray-500 text-xs">First Name</p>
+  <p className="text-sm">{firstName}</p>
+</div>
+<div>
+  <p className="text-gray-500 text-xs">Middle Name</p>
+  <p className="text-sm">{middleName || " "}</p> {/* Empty if no middle name */}
+</div>
+<div>
+  <p className="text-gray-500 text-xs">Last Name</p>
+  <p className="text-sm">{lastName}</p>
+</div>
             <div>
               <p className="text-gray-500 text-xs">Date of Birth</p>
               <p className="text-sm">

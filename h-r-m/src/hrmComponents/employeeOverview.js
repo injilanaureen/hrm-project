@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { CSVLink } from 'react-csv';
+
 
 import axios from "axios";
 
@@ -25,8 +27,55 @@ function EmployeeOverview() {
   useEffect(() => {
     if (id) getEmployee();
   }, [id]);
+
+  const formattedEmployeeData = [{
+    emp_id: employee?.user?.emp_id || "N/A",
+    emp_full_name: employee?.user?.emp_full_name || "N/A",
+    emp_designation: employee?.user?.emp_designation || "N/A",
+    dep_name: employee?.department?.dep_name || "N/A",
+    emp_email: employee?.user?.emp_email || "N/A",
+    emp_personal_email: employee?.user?.emp_personal_email || "N/A",
+    emp_phone_no: employee?.user?.emp_phone_no || "N/A",
+    role_name: employee?.role_name || "N/A",
+    office_location: employee?.office_location || "N/A",
+    hod: employee?.hod || "N/A",
+    emp_gender: employee?.user?.emp_gender || "N/A",
+    emp_join_date: employee?.user?.emp_join_date
+      ? new Date(employee.user.emp_join_date).toLocaleDateString()
+      : "N/A",
+    emp_confirmation_date: employee?.user?.emp_confirmation_date
+      ? new Date(employee.user.emp_confirmation_date).toLocaleDateString()
+      : "N/A",
+    emp_dob: employee?.user?.emp_dob
+      ? new Date(employee.user.emp_dob).toLocaleDateString()
+      : "N/A"
+  }];
+  console.log(formattedEmployeeData)
  
   if (!employee) return <div>Loading...</div>;
+  const headers = [
+    { label: 'Employee ID', key: 'emp_id' },
+    { label: 'Full Name', key: 'emp_full_name' },
+    { label: 'Designation', key: 'emp_designation' },
+    { label: 'Department', key: 'dep_name' },  // Corrected key
+    { label: 'Email ID', key: 'emp_email' },   // Corrected key
+    { label: 'Personal Email', key: 'emp_personal_email' },
+    { label: 'Office Mobile Number', key: 'emp_phone_no' },
+    { label: 'Current Role', key: 'role_name' },
+    { label: 'Office Location', key: 'office_location' },
+    { label: 'HOD', key: 'hod' },
+    { label: 'Gender', key: 'emp_gender' }, // Corrected key
+    { label: 'Date of Joining', key: 'emp_join_date' },
+    { label: 'Date of Confirmation', key: 'emp_confirmation_date' },
+    { label: 'Date of Birth', key: 'emp_dob' }
+  ];
+  const fullName = employee?.user?.emp_full_name || "";
+  const nameParts = fullName.split(" ");
+  
+  const firstName = nameParts[0] || "NA";
+  const middleName = nameParts.length > 2 ? nameParts[1] : "N/A"; // Middle name is only assigned if there are more than two parts
+  const lastName = nameParts.length > 2 ? nameParts[2] : nameParts[1] || "NA"; // If only two parts, assign the second as the last name
+  
  
   return (
     <div className="p-4 space-y-6">
@@ -45,9 +94,13 @@ function EmployeeOverview() {
               VIEW PERSONAL DETAILS
             </button>
           </Link>
-          <button className="bg-purple-500 text-white px-3 py-1.5 rounded text-sm">
+        <CSVLink
+                 data={formattedEmployeeData}  // <-- Using filteredEmployees here
+                 headers={headers}
+                 filename={"employee_details.csv"}
+                 className="bg-purple-500 text-white px-3 py-1.5 rounded text-sm"               >
             DOWNLOAD
-          </button>
+        </CSVLink>
  
           {/* forget button  */}
           {/* <button className="bg-indigo-400 text-white px-3 py-1.5 rounded text-sm" onClick={() => setShowPasswordModal(true)}>
@@ -84,7 +137,7 @@ function EmployeeOverview() {
           <div>
             <p className="text-gray-500 text-xs">HOD</p>
             <p className="text-sm">
-              {employee?.hod || "Dr Bandana Kedia (PPIN311)"}
+              {employee?.hod || "Nitesh Pathak"}
             </p>
           </div>
           <div>
@@ -118,32 +171,21 @@ function EmployeeOverview() {
         <div>
           <h3 className="text-sm font-medium mb-3">Biographical</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <p className="text-gray-500 text-xs">First Name</p>
-              <p className="text-sm">
-                {" "}
-                {employee?.user?.emp_full_name
-                  ? employee?.user?.emp_full_name.split(" ")[0]
-                  : "NA"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 text-xs">Middle Name</p>
-              <p className="text-sm">
-                {" "}
-                {employee?.user?.emp_full_name
-                  ? employee?.user?.emp_full_name.split(" ")[1] || "NA"
-                  : "NA"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-500 text-xs">Last Name</p>
-              <p className="text-sm">
-                {employee?.user?.emp_full_name
-                  ? employee?.user?.emp_full_name.split(" ")[2] || "NA"
-                  : "NA"}
-              </p>
-            </div>
+  
+
+<div>
+  <p className="text-gray-500 text-xs">First Name</p>
+  <p className="text-sm">{firstName}</p>
+</div>
+<div>
+  <p className="text-gray-500 text-xs">Middle Name</p>
+  <p className="text-sm">{middleName || " "}</p> {/* Empty if no middle name */}
+</div>
+<div>
+  <p className="text-gray-500 text-xs">Last Name</p>
+  <p className="text-sm">{lastName}</p>
+</div>
+
             <div>
               <p className="text-gray-500 text-xs">Date of Birth</p>
               <p className="text-sm">
