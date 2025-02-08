@@ -390,10 +390,13 @@ Section */}
         <div>
           <h3 className="text-sm font-medium mb-3">Bank Details</h3>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <div>
+          <div>
               <p className="text-gray-500 text-xs">Account Holder Name</p>
               <p className="text-sm">
-                {employee.banking?.account_holder_name || "Not Provided"}
+
+
+                {employee.banking?.account_holder_name	 || "Not Provided"}
+
               </p>
             </div>
             <div>
