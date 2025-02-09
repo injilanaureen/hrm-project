@@ -25,54 +25,123 @@ const Attendance = () => {
   const currentData = sampleData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-4">Attendance Records</h2>
-      {/* Current Date */}
-      <p className="text-sm text-gray-600 mb-4">
-        Current Date: <strong>{new Date().toLocaleDateString()}</strong>
-      </p>
+    <div className="p-4 bg-white rounded-lg shadow w-full">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-center mb-4">
+        <h1 className="text-lg md:text-xl font-semibold text-center md:text-left">Attendance for 2025-Feb</h1>
+        <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
+          <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">Pending Request (0)</span>
+          <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">System Triggered Leave (2)</span>
+          <button className="px-4 py-1 bg-purple-500 text-white rounded-lg">APPLY</button>
+        </div>
+      </div>
 
-      {/* Attendance Table */}
-      <table className="w-full table-auto border-collapse">
-        <thead>
-          <tr className="bg-gray-200">
-            <th className="px-4 py-2 border">ID</th>
-            <th className="px-4 py-2 border">Name</th>
-            <th className="px-4 py-2 border">Check-In</th>
-            <th className="px-4 py-2 border">Check-Out</th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentData.map((record) => (
-            <tr key={record.id} className="hover:bg-gray-100">
-              <td className="px-4 py-2 border">{record.id}</td>
-              <td className="px-4 py-2 border">{record.name}</td>
-              <td className="px-4 py-2 border">{record.checkIn}</td>
-              <td className="px-4 py-2 border">{record.checkOut}</td>
+      {/* Search and Filters */}
+      <div className="flex flex-col md:flex-row justify-between items-center gap-2 mb-4">
+        <div className="flex w-full md:w-auto gap-2">
+          <input type="text" placeholder="Search Employee" className="px-4 py-2 border rounded-lg w-full md:w-auto" />
+          <button className="px-4 py-2 bg-purple-100 text-purple-600 rounded-lg">ONE VIEW</button>
+        </div>
+        <div className="flex w-full md:w-auto gap-2">
+          <select className="px-4 py-2 border rounded-lg w-full md:w-auto">
+            <option>2025-Feb</option>
+          </select>
+          <select className="px-4 py-2 border rounded-lg w-full md:w-auto">
+            <option>2025</option>
+          </select>
+          <button className="px-4 py-2 bg-purple-100 text-purple-600 rounded-lg">REGULARIZE</button>
+        </div>
+      </div>
+
+      {/* Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="border rounded-lg p-4">
+          <h2 className="text-lg font-medium mb-2">Total</h2>
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <div className="text-2xl font-bold">2</div>
+              <div className="text-gray-500">Leave Days</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold">9</div>
+              <div className="text-gray-500">Present Days</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold">0</div>
+              <div className="text-gray-500">Absent Days</div>
+            </div>
+          </div>
+        </div>
+        <div className="border rounded-lg p-4">
+          <h2 className="text-lg font-medium mb-2">AVERAGE</h2>
+          <div className="grid grid-cols-2 gap-4 text-center">
+            <div>
+              <div className="text-2xl font-bold">09:02</div>
+              <div className="text-gray-500">Work Duration</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold">00:19</div>
+              <div className="text-gray-500">Late By</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Info Sections */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+        <div className="border rounded-lg p-4">
+          <h3 className="font-medium mb-2">Clocking Priority</h3>
+          <p>BIOMETRIC</p>
+        </div>
+        <div className="border rounded-lg p-4">
+          <h3 className="font-medium mb-2">Shift</h3>
+          <p className="text-sm">Standard Shift (10:00:00 - 19:00:00)</p>
+        </div>
+        <div className="border rounded-lg p-4">
+          <h3 className="font-medium mb-2">Policy</h3>
+          <p className="text-purple-600">New Attendance Policy</p>
+        </div>
+        <div className="border rounded-lg p-4">
+          <h3 className="font-medium mb-2">Weekly Off</h3>
+          <p className="text-sm">Saturday and Sunday</p>
+        </div>
+      </div>
+
+      {/* Responsive Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-50">
+            <tr>
+              {["DATE", "TIME IN", "TIME OUT", "WORK DURATION", "LATE BY", "CLOCK IN", "CLOCK OUT", "STATUS", "OPERATION", "ASSIGNMENT"].map((heading) => (
+                <th key={heading} className="px-4 py-2 text-left whitespace-nowrap">{heading}</th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {/* Pagination */}
-      <div className="flex justify-between items-center mt-4">
-        <button
-          onClick={handlePrevPage}
-          disabled={currentPage === 1}
-          className="bg-gray-500 text-white px-4 py-2 rounded disabled:opacity-50"
-        >
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          onClick={handleNextPage}
-          disabled={currentPage === totalPages}
-          className="bg-gray-500 text-white px-4 py-2 rounded disabled:opacity-50"
-        >
-          Next
-        </button>
+          </thead>
+          <tbody>
+            {attendanceData.map((row, index) => (
+              <tr key={index} className="border-b">
+                <td className="px-4 py-2">{row.date}</td>
+                <td className="px-4 py-2">{row.timeIn || "-"}</td>
+                <td className="px-4 py-2">{row.timeOut || "-"}</td>
+                <td className="px-4 py-2">{row.totalWork || "-"}</td>
+                <td className="px-4 py-2">{row.lateBy || "-"}</td>
+                <td className="px-4 py-2">{row.recordedClockIn || "-"}</td>
+                <td className="px-4 py-2">{row.recordedClockOut || "-"}</td>
+                <td className="px-4 py-2">
+                  <span className={`font-medium ${row.status === "Weekly Off" ? "text-purple-600" : row.status.includes("Leave") ? "text-green-600" : "text-black"}`}>
+                    {row.status}
+                  </span>
+                </td>
+                <td className="px-4 py-2">
+                  <button className="text-gray-500 hover:text-gray-700">Edit</button>
+                </td>
+                <td className="px-4 py-2">
+                  <button className="text-blue-600 hover:text-blue-800">View</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
