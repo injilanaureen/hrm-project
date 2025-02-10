@@ -24,7 +24,7 @@ function EmployeePersonalDetails() {
     if (empId) {
       // Fetch documents from backend when employee ID is entered
       axios
-        .get(`http://localhost:5000/api/upload/getdocuments/${empId}`)
+        .get(`${process.env.REACT_APP_API_URL}/api/auth/api/upload/getdocuments/${empId}`)
         .then((response) => {
           setDocuments(response.data.documents);
         })
@@ -56,7 +56,7 @@ function EmployeePersonalDetails() {
   
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/adduser/updateEmergencyContact/${employee.user?.emp_id}`,
+       `${process.env.REACT_APP_API_URL}/api/auth/api/adduser/updateEmergencyContact/${employee.user?.emp_id}`,
         {
           emergency_person_name: modalEmployee.personalData.emergency_person_name,
           emergency_relationship: modalEmployee.personalData.emergency_relationship,
@@ -90,7 +90,7 @@ function EmployeePersonalDetails() {
   const getEmployee = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/adduser/getSingleEmployeeBy/${empId}`
+        `${process.env.REACT_APP_API_URL}/api/auth/api/adduser/getSingleEmployeeBy/${empId}`
       );
       console.log(response.data);
       setEmployee(response.data);
@@ -102,7 +102,7 @@ function EmployeePersonalDetails() {
   const getEmployeeEducation = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/adduser/getSingleEmployeeeducation/${empId}`
+        `${process.env.REACT_APP_API_URL}/api/auth/api/adduser/getSingleEmployeeeducation/${empId}`
       );
       console.log(response.data); // Check what the backend returns
       if (response.data.success && Array.isArray(response.data.data)) {

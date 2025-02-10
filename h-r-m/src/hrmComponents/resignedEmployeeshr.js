@@ -41,7 +41,7 @@ const ResignedEmployees1 = () => {
   // Function to fetch resigned employees
   const fetchResignedEmployees = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/adduser/fetch_resigned_employees"); // API endpoint
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/adduser/fetch_resigned_employees`); // API endpoint
       console.log(response.data)
       setResignedEmployees(response.data);
     } catch (error) {

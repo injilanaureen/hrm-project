@@ -25,7 +25,7 @@ function Employee() {
   const getEmployee = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/adduser/getSingleEmployeeBy/${user.emp_id}`
+        `${process.env.REACT_APP_API_URL}/api/adduser/getSingleEmployeeBy/${user.emp_id}`
       );
       console.log(response.data);
       

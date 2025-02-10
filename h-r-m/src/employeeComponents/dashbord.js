@@ -3,28 +3,28 @@ import { Link } from "react-router-dom";
 
 const DashboardGrid = () => {
   const modules = [
-    { label: "Task Box", image: "/task.png", path: "taskbox" },
-    { label: "Profile", image: "/employees.png", path: "employee" },
-    { label: "Attendance", image: "/attendance.png", path: "attendance" },
-    { label: "Leave", image: "/leaves.png", path: "leave" },
-    { label: "HR Policies", image: "/hr-policies.png", path: "hrPolicies" },
-    { label: "My Documents", image: "/hr-document.png", path: "hrDocuments" },
+    { label: "Task Box", image: "/images/task.png", path: "taskbox" },
+    { label: "Profile", image: "/images/employees.png", path: "employee" },
+    { label: "Attendance", image: "/images/attendance.png", path: "attendance" },
+    { label: "Leave", image: "/images/leaves.png", path: "leave" },
+    { label: "HR Policies", image: "/images/hr-policies.png", path: "hrPolicies" },
+    { label: "My Documents", image: "/images/hr-document.png", path: "hrDocuments" },
     // { label: "Recruitment", image: "/recruitment.png", path: "recruitment" },
-    { label: "Calendar", image: "/calendar.png", path: "calendar" },
-    { label: "Performance", image: "/performance.png", path: "performance" },
+    { label: "Calendar", image: "/images/calendar.png", path: "calendar" },
+    { label: "Performance", image: "/images/performance.png", path: "performance" },
     // { label: "Logit", image: "/parcel.png", path: "logit" },
     // { label: "Evolve", image: "/evolution.png", path: "evolve" },
     // { label: "EPFO Website", image: "/epfo.png", path: "epfoWebite" },
-    { label: "Policies", image: "/privacy-policy.png", path: "policies" },
+    { label: "Policies", image: "/images/privacy-policy.png", path: "policies" },
     // { label: "P2P", image: "/p2p.png", path: "p2p" },
     // { label: "Happay", image: "/happay.png", path: "happay" },
     // { label: "Blue Box", image: "/blue-box.png", path: "bluebox" },
-    { label: "Helpdesk", image: "/help-desk.png", path: "helpdesk" },
-    { label: "More", image: "/more.png", path: "yatya" },
+    { label: "Helpdesk", image: "/images/help-desk.png", path: "helpdesk" },
+    { label: "More", image: "/images/more.png", path: "yatya" },
   ];
 
   return (
-      <>
+      <div className="container mx-auto">
         <div className="p-4 md:p-6">
           <h1 className="mb-6 text-xl">My Access</h1>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 md:gap-8">
@@ -46,7 +46,7 @@ const DashboardGrid = () => {
             ))}
           </div>
         </div>
-      </>
+      </div>
   );
 };
 

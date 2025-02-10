@@ -114,7 +114,7 @@ function Employee() {
 
   const fetchRoles = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/adduser/fetchRole');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/adduser/fetchRole`);
       if (response.data.success) {
         setRoles(response.data.data);
       } else {
@@ -127,7 +127,7 @@ function Employee() {
 
   const fetchDepartment = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/adduser/fetchDepartment');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/adduser/fetchDepartment`);
       if (response.data.success) {
         setDepartments(response.data.data);
       } else {
@@ -141,7 +141,7 @@ function Employee() {
 
   const fetchDesignations = async (dept_id) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/adduser/fetchDesignation?dept_id=${dept_id}`);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/adduser/fetchDesignation?dept_id=${dept_id}`);
       if (response.data.success) {
         setDesignations(response.data.data);
       } else {
@@ -154,7 +154,7 @@ function Employee() {
 
   const fetchRolePermissions = async (roleId) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/adduser/getRolePermissions?role_id=${roleId}`);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/auth/api/adduser/getRolePermissions?role_id=${roleId}`);
       if (response.data.success) {
         setFormData(prev => ({
           ...prev,
@@ -170,7 +170,7 @@ function Employee() {
 
   const fetchAllEmployees = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/adduser/getAllEmployees');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/adduser/getAllEmployees`);
       console.log("Response data:", response.data.data); // Log the response
       const employeesData = response.data.data;
       
@@ -239,7 +239,7 @@ function Employee() {
     console.log(formData)
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/adduser/submitUser",
+        `${process.env.REACT_APP_API_URL}/api/adduser/submitUser`,
        formData
       );
           
@@ -554,7 +554,7 @@ function Employee() {
                   const diffInMonths =
                     (currentDate - joiningDate) / (1000 * 3600 * 24 * 30);
 
-                  if (diffInMonths <= 3) {
+                  if (diffInMonths <= 5) {
                     return row.emp_empstatus ;
                   } else {
                     return "Pending Approval for Permanent Status";

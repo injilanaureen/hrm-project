@@ -29,7 +29,7 @@ function Personaldetails() {
     if (id) {
       // Fetch documents from backend when employee ID is entered
       axios
-        .get(`http://localhost:5000/api/upload/getdocuments/${id}`)
+        .get(`${process.env.REACT_APP_API_URL}/api/upload/getdocuments/${id}`)
         .then((response) => {
           setDocuments(response.data.documents);
         })
@@ -53,7 +53,7 @@ function Personaldetails() {
 
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/adduser/updateNamemarital_status/${employee?.user?.emp_id}`,
+        `${process.env.REACT_APP_API_URL}/api/adduser/updateNamemarital_status/${employee?.user?.emp_id}`,
         {
           emp_name: mastermodalEmployee?.user?.emp_full_name, // Fix here
           marital_status: mastermodalEmployee?.personalData?.marital_status, // Fix here
@@ -117,7 +117,7 @@ function Personaldetails() {
 
     try {
       const response = await axios.put(
-        `http://localhost:5000/api/adduser/updateEmergencyContact/${employee.user?.emp_id}`,
+       `${process.env.REACT_APP_API_URL}/api/adduser/updateEmergencyContact/${employee.user?.emp_id}`,
         {
           emergency_person_name:
             modalEmployee.personalData.emergency_person_name,
@@ -180,7 +180,7 @@ function Personaldetails() {
   
       // API call to update employee data
       const response = await axios.put(
-        `http://localhost:5000/api/adduser/updatePersonalIdentity/${employee.user.emp_id}`, 
+        `${process.env.REACT_APP_API_URL}/api/adduser/updatePersonalIdentity/${employee.user.emp_id}`, 
         {
           emp_addhar_no: pmodalEmployee.user.emp_addhar_no,
           emp_pan_card_no: pmodalEmployee.user.emp_pan_card_no,
@@ -215,7 +215,7 @@ function Personaldetails() {
   const getEmployee = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/adduser/getSingleEmployeeBy/${id}`
+        `${process.env.REACT_APP_API_URL}/api/adduser/getSingleEmployeeBy/${id}`
       );
       console.log(response.data);
 
