@@ -127,9 +127,7 @@ addAttendance.get("/getShift", async (req, res) => {
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
     return `${hours}h ${minutes}m`;
-  }
-  
-  
+  }  
   addAttendance.put("/updateAttendance/:id", async (req, res) => {
     try {
       const { id } = req.params; // Object ID from URL
@@ -211,7 +209,7 @@ addAttendance.get("/getShift", async (req, res) => {
     }
   });
   
-  
+
   addAttendance.get("/getAttendanceByDate", async (req, res) => {
     try {
         const { emp_id1, date } = req.query;
