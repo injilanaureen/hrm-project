@@ -6,6 +6,7 @@ import { FaEdit } from "react-icons/fa"; // If using React Icons for better perf
 import { FaKey, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { ArrowLeft } from "lucide-react";
 
+
 function Employee() {
   const [modalEmployee, setModalEmployee] = useState({});
   const { user } = useAuth();
