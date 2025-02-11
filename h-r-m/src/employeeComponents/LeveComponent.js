@@ -41,6 +41,8 @@ const LeaveManagement = () => {
   const [sickLeave, setSickLeave] = useState({
     sick_leave: 0,
   });
+
+  const [statusOfLeave, setStatusOfLeave] = useState("");
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,6 +50,8 @@ const LeaveManagement = () => {
   const ITEMS_PER_PAGE = 10;
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [daysRequested, setDaysRequested] = useState(0);
+
 
   useEffect(() => {
     setTotalPages(Math.ceil(leaveRequests.length / ITEMS_PER_PAGE));
@@ -122,83 +126,96 @@ const LeaveManagement = () => {
     reason: "",
   });
 
-  const calculateDays = (start, end) => {
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    if (endDate < startDate) {
-      return -1; // Invalid date range
-    }
-    return Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+ // Function to calculate days requested
+const calculateDays = (start, end) => {
+  if (!start || !end) return 0;
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const diffTime = endDate - startDate;
+  return diffTime > 0 ? Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1 : 0;
+};
+
+// Handle Input Change
+const handleInputChange = (e) => {
+  const { name, value } = e.target;
+  setFormData((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
+
+// **Validation Effect** (Runs whenever startDate, endDate, or leaveType changes)
+useEffect(() => {
+  if (!formData.startDate || !formData.endDate) {
+    setStatusOfLeave("");
+    return;
+  }
+
+  const days = calculateDays(formData.startDate, formData.endDate);
+  setDaysRequested(days);
+
+  if (days <= 0) {
+    setStatusOfLeave("Invalid date range. End date must be after start date.");
+    return;
+  }
+
+  if (formData.leaveType === "Casual Leave" && days > casualLeave.casual_leave) {
+    setStatusOfLeave("Insufficient casual leave");
+  } else if (formData.leaveType === "Earned Leave" && days > earnedLeave.earned_leave) {
+    setStatusOfLeave("Insufficient earned leave");
+  } else if (formData.leaveType === "Sick Leave" && days > sickLeave.sick_leave) {
+    setStatusOfLeave("Insufficient sick leave");
+  } else {
+    setStatusOfLeave(""); // Clear error if valid
+  }
+}, [formData.startDate, formData.endDate, formData.leaveType]);
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  console.log(formData);
+
+  if (!formData.leaveType) {
+    alert("Please select a leave type.");
+    return;
+  }
+
+  // Check if there's an insufficient leave error
+  if (statusOfLeave) {
+    alert(statusOfLeave); // Show the error message to the user
+    return;
+  }
+
+  // Ensure dates are formatted for backend
+  const startDateFormatted = new Date(formData.startDate).toISOString().split("T")[0];
+  const endDateFormatted = new Date(formData.endDate).toISOString().split("T")[0];
+
+  const leaveRequest = {
+    emp_id: user.emp_id,
+    leaveType: formData.leaveType,
+    leaveStartDate: startDateFormatted,
+    leaveEndDate: endDateFormatted,
+    days_requested: daysRequested,
+    leaveReason: formData.reason,
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  console.log("request", leaveRequest);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  try {
+    const response = await axios.post(
+      "http://localhost:5000/api/leave/apply-leave",
+      leaveRequest
+    );
 
-    // Validate leave type
-    if (!formData.leaveType) {
-      alert("Please select a leave type.");
-      return;
-    }
+    console.log(response.data.message);
+    setFormData({ leaveType: "", startDate: "", endDate: "", reason: "" });
+    setStatusOfLeave(""); // Reset status after successful submission
+  } catch (error) {
+    console.error("Error submitting leave request:", error);
+    alert(error.response?.data?.message || "Failed to submit leave request. Please try again.");
+  }
+};
 
-    // Validate dates
-    const daysRequested = calculateDays(formData.startDate, formData.endDate);
-    if (daysRequested <= 0) {
-      alert("Invalid date range. End date must be after start date.");
-      return;
-    }
-
-    // Validate leave balance
-    // if (daysRequested > leaveBalance.total_leave) {
-    //   alert("Insufficient leave balance!");
-    //   return;
-    // }
-
-    // Ensure dates are in MySQL compatible format (YYYY-MM-DD)
-    const startDateFormatted = new Date(formData.startDate).toISOString().split('T')[0];
-    const endDateFormatted = new Date(formData.endDate).toISOString().split('T')[0];
-
-    // Prepare data for API
-    const leaveRequest = {
-      emp_id: user.emp_id,
-      leave_type: formData.leaveType,
-      start_date: startDateFormatted, // Ensure this is in correct format
-      end_date: endDateFormatted, // Ensure this is in correct format
-      days_requested: daysRequested,
-      reason: formData.reason,
-    };
-
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/api/leave/apply-leave",
-        leaveRequest
-      );
-
-      // Handle the success response
-      alert(response.data.message); // Show success message
-
-      // Reset form
-      setFormData({
-        leaveType: "",
-        startDate: "",
-        endDate: "",
-        reason: "",
-      });
-    } catch (error) {
-      console.error("Error submitting leave request:", error);
-      alert(
-        error.response?.data?.message ||
-        "Failed to submit leave request. Please try again."
-      );
-    }
-  };
+  
   const truncateText = (text, maxLength = 50) => {
     if (!text) return "";
     if (text.length <= maxLength) return text;
@@ -292,14 +309,18 @@ const LeaveManagement = () => {
               />
             </div>
           </div>
-          {formData.startDate && formData.endDate && (
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <p className="text-gray-700 font-medium">
-                Days Requested:{" "}
-                {calculateDays(formData.startDate, formData.endDate)}
-              </p>
-            </div>
-          )}
+
+          {/* Display Days and Validation Message */}
+    {formData.startDate && formData.endDate && (
+      <div className="bg-gray-50 p-3 rounded-lg flex gap-2">
+        <p className="text-gray-700 font-medium">
+          Days Requested: {daysRequested}
+        </p>
+        <p className={statusOfLeave ? "text-red-500" : "text-black"}>
+          {statusOfLeave}
+        </p>
+      </div>
+    )}
           <div>
             <label className="block text-gray-700 font-medium mb-1">
               Reason
@@ -335,6 +356,11 @@ const LeaveManagement = () => {
               <table className="min-w-full border-collapse border border-gray-200">
                 <thead>
                   <tr className="bg-gray-100">
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 border-b">
+                      S.No
+                    </th> <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 border-b">
+                      Apply Date
+                    </th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 border-b">
                       Leave Type
                     </th>
@@ -356,42 +382,49 @@ const LeaveManagement = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {getPaginatedData().map((request) => (
+                  {getPaginatedData().map((request , index) => (
                     <tr
                       key={request.leave_app_id}
                       className="hover:bg-gray-50 transition-colors"
                     >
-                      <td className="px-6 py-4 text-sm text-gray-600 border-b">
-                        {request.leave_type}
+                    
+                    <td className="px-6 py-4 text-sm text-gray-600 border-b">
+                      {index+1}
+                      </td>
+                       <td className="px-6 py-4 text-sm text-gray-600 border-b">
+                        {new Date(request.leaveApplydate).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600 border-b">
-                        {new Date(request.leave_start_date).toLocaleDateString()}
+                        {request.leaveType}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600 border-b">
-                        {new Date(request.leave_end_date).toLocaleDateString()}
+                        {new Date(request.leaveStartDate).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600 border-b">
-                        {request.leave_days}
+                        {new Date(request.leaveEndDate).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600 border-b">
+                      {request.days_requested ?? "N/A"} 
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600 border-b">
                         <button
-                          onClick={() => handleReasonClick(request.reason)}
+                          onClick={() => handleReasonClick(request.leaveReason)}
                           className="text-left hover:text-blue-600 cursor-pointer"
                         >
-                          {truncateText(request.reason)}
+                          {truncateText(request.leaveReason)}
                         </button>
                       </td>
                       <td className="px-6 py-4 text-sm border-b">
                         <span
                           className={`px-3 py-1 rounded-full text-sm font-medium ${
-                            request.status === "Approved"
+                            request.leaveStatus === "Approved"
                               ? "bg-green-100 text-green-800"
-                              : request.status === "Rejected"
+                              : request.leaveStatus === "Rejected"
                               ? "bg-red-100 text-red-800"
                               : "bg-yellow-100 text-yellow-800"
                           }`}
                         >
-                          {request.status}
+                          {request.leaveStatus}
                         </span>
                       </td>
                     </tr>

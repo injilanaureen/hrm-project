@@ -8,6 +8,7 @@ const RequestLeaveSchema = new mongoose.Schema({
   leaveStartDate: { type: Date, required: true },
   leaveEndDate: { type: Date, required: true },
   leaveStatus: { type: String, default: "Pending", enum: ["Pending", "Approved", "Rejected"] },  // Adding possible statuses
+  days_requested :{  type : Number }
 });
 
 // Create a unique index for emp_id + date (to prevent duplicate records for the same day)
