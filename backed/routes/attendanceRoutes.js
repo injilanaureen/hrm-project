@@ -152,77 +152,77 @@ function formatMinutes(minutes) {
 }
 
 // API to add attendance (Clock In)
-addAttendance.post("/addAttendance", async (req, res) => {
-  try {
-      const { emp_id, date, time_in } = req.body;
+// addAttendance.post("/addAttendance", async (req, res) => {
+//   try {
+//       const { emp_id, date, time_in } = req.body;
 
-      if (!emp_id || !date || !time_in) {
-          return res.status(400).json({ message: "emp_id, date, and time_in are required" });
-      }
+//       if (!emp_id || !date || !time_in) {
+//           return res.status(400).json({ message: "emp_id, date, and time_in are required" });
+//       }
 
-      // Find the employee's shift
-      const shift = await Shift.findOne({ emp_id });
-      if (!shift) {
-          return res.status(404).json({ message: "Shift data not found for employee" });
-      }
+//       // Find the employee's shift
+//       const shift = await Shift.findOne({ emp_id });
+//       if (!shift) {
+//           return res.status(404).json({ message: "Shift data not found for employee" });
+//       }
 
-      const timeInMinutes = convertToMinutes(time_in);
-      const shiftInMinutes = convertToMinutes(shift.shift_in);
-      const graceLimit = convertToMinutes("10:30"); // 10:30 AM grace limit
-      const lateHalfDayLimit = convertToMinutes("10:10"); // Half-day if 6th late arrival and before 10:10 AM
-      const fullDayAbsenceLimit = convertToMinutes("14:00"); // Mark absent if after 2:00 PM
+//       const timeInMinutes = convertToMinutes(time_in);
+//       const shiftInMinutes = convertToMinutes(shift.shift_in);
+//       const graceLimit = convertToMinutes("10:30"); // 10:30 AM grace limit
+//       const lateHalfDayLimit = convertToMinutes("10:10"); // Half-day if 6th late arrival and before 10:10 AM
+//       const fullDayAbsenceLimit = convertToMinutes("14:00"); // Mark absent if after 2:00 PM
 
-      let status = "Present";
-      let late_by = "N/A";
+//       let status = "Present";
+//       let late_by = "N/A";
 
-      if (timeInMinutes > shiftInMinutes) {
-          late_by = formatMinutes(timeInMinutes - shiftInMinutes);
-      }
+//       if (timeInMinutes > shiftInMinutes) {
+//           late_by = formatMinutes(timeInMinutes - shiftInMinutes);
+//       }
 
-      // Fetch employee's past attendance to track late arrivals
-      const pastLateCount = await Attendance.countDocuments({
-          emp_id,
-          late_by: { $ne: "N/A" },
-          date: { $regex: `^${date.substring(0, 7)}` } // Matches current month
-      });
+//       // Fetch employee's past attendance to track late arrivals
+//       const pastLateCount = await Attendance.countDocuments({
+//           emp_id,
+//           late_by: { $ne: "N/A" },
+//           date: { $regex: `^${date.substring(0, 7)}` } // Matches current month
+//       });
 
-      if (timeInMinutes > shiftInMinutes) {
-          if (pastLateCount >= 5) {
-              if (timeInMinutes <= lateHalfDayLimit) {
-                  status = "Half-Day";
-              } else if (timeInMinutes >= fullDayAbsenceLimit) {
-                  status = "Absent";
-              } else {
-                  status = "Late";
-              }
-          } else if (timeInMinutes <= graceLimit) {
-              status = "Present"; // Still within grace period
-          } else {
-              status = "Late";
-          }
-      }
+//       if (timeInMinutes > shiftInMinutes) {
+//           if (pastLateCount >= 5) {
+//               if (timeInMinutes <= lateHalfDayLimit) {
+//                   status = "Half-Day";
+//               } else if (timeInMinutes >= fullDayAbsenceLimit) {
+//                   status = "Absent";
+//               } else {
+//                   status = "Late";
+//               }
+//           } else if (timeInMinutes <= graceLimit) {
+//               status = "Present"; // Still within grace period
+//           } else {
+//               status = "Late";
+//           }
+//       }
 
-      const newAttendance = new Attendance({
-          emp_id,
-          date,
-          time_in,
-          time_out: "N/A",
-          total_work_duration: "N/A",
-          late_by,
-          early_out: "N/A",
-          record_clock_in: true,
-          record_clock_out: false,
-          status
-      });
+//       const newAttendance = new Attendance({
+//           emp_id,
+//           date,
+//           time_in,
+//           time_out: "N/A",
+//           total_work_duration: "N/A",
+//           late_by,
+//           early_out: "N/A",
+//           record_clock_in: true,
+//           record_clock_out: false,
+//           status
+//       });
 
-      await newAttendance.save();
+//       await newAttendance.save();
 
-      res.status(201).json({ message: "Attendance saved successfully", data: newAttendance });
-  } catch (error) {
-      console.error("Error saving attendance:", error);
-      res.status(500).json({ message: "Server error", error: error.message });
-  }
-});
+//       res.status(201).json({ message: "Attendance saved successfully", data: newAttendance });
+//   } catch (error) {
+//       console.error("Error saving attendance:", error);
+//       res.status(500).json({ message: "Server error", error: error.message });
+//   }
+// });
 
 // API to update attendance (Clock Out)
 addAttendance.put("/updateAttendance/:id", async (req, res) => {

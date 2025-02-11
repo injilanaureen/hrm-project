@@ -70,7 +70,7 @@ const LeaveManagement = () => {
     const fetchTotalLeave = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/leave/totalLeave/${user.emp_id}`
+          `http://localhost:5000/api/leave/getSingleLeaveData/${user.emp_id}`
         );
         console.log("Leave Requests:", response.data);
         setLeaveBalance({
@@ -101,7 +101,7 @@ const LeaveManagement = () => {
       const fetchLeaveRequests = async () => {
         try {
           const response = await axios.get(
-            `http://localhost:5000/api/leave/leaveRequests/${user.emp_id}`
+            `http://localhost:5000/api/leave/leave-requests/${user.emp_id}`
           );
          
           
@@ -177,7 +177,7 @@ const LeaveManagement = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/leave/request",
+        "http://localhost:5000/api/leave/apply-leave",
         leaveRequest
       );
 
@@ -258,9 +258,10 @@ const LeaveManagement = () => {
             >
               <option value="">Select Leave Type</option>
               <option value="Sick Leave">Sick Leave</option>
-              <option value="Earned Leaves">Earned Leaves</option>
-              <option value="Casual Leaves">Casual Leaves</option>
+              <option value="Earned Leave">Earned Leave </option>
+              <option value="Casual Leave">Casual Leave </option>
               <option value="Other">Other</option>
+
             </select>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
