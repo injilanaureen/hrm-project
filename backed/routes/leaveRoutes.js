@@ -79,7 +79,7 @@ leaveRouter.delete("/delete/:emp_id", async (req, res) => {
 // Route to apply for leave (POST)
 leaveRouter.post("/apply-leave", async (req, res) => {
   try {
-    const { emp_id, leaveReason, leaveType, leaveStartDate, leaveEndDate } = req.body;
+    const { emp_id, leaveReason, leaveType, leaveStartDate, leaveEndDate ,days_requested } = req.body;
 
     // Validate required fields
     if (!emp_id || !leaveReason || !leaveType || !leaveStartDate || !leaveEndDate) {
@@ -105,6 +105,8 @@ leaveRouter.post("/apply-leave", async (req, res) => {
       leaveType,
       leaveStartDate,
       leaveEndDate,
+      days_requested,
+      
     });
 
     // Save to database
@@ -115,6 +117,8 @@ leaveRouter.post("/apply-leave", async (req, res) => {
     console.error("Error applying leave:", error);
     res.status(500).json({ message: "Server error, please try again later." });
   }
+
+  
 });
 
 // Route to get all leave requests (GET HR side)
