@@ -64,7 +64,7 @@ const UpdateResignedEmployeeForm = ({ setShowDialog2, selectedEmployee1 }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:5000/api/adduser/resigned_employees", {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/adduser/resigned_employees`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ emp_id: selectedEmployee1.emp_id, ...formData }),

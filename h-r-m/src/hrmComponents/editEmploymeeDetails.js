@@ -18,7 +18,7 @@ const EditEmployeeDetails = ({ selectedEmployee, setEmployementStatus }) => {
    const [teamLeaderList, setTeamLeaderList] = useState([]);
    const fetchAllEmployees = async () => {
      try {
-       const response = await axios.get('http://localhost:5000/api/adduser/getAllEmployees');
+       const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/auth/api/adduser/getAllEmployees`);
        if (response.data.success) {
          const employeesData = response.data.data;
          setAllEmployees(employeesData.employees)
@@ -43,7 +43,7 @@ const EditEmployeeDetails = ({ selectedEmployee, setEmployementStatus }) => {
  const fetchDesignations = async (dept_id) => {
 
    try {
-     const response = await axios.get(`http://localhost:5000/api/adduser/fetchDesignation?dept_id=${dept_id}`);
+     const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/auth/api/adduser/fetchDesignation?dept_id=${dept_id}`);
      if (response.data.success) {
        setDesignations(response.data.data);
    
@@ -60,7 +60,7 @@ e.preventDefault();
    if (!selectedEmployee) return;
 
    try {
-     const response = await axios.put("http://localhost:5000/api/adduser/editEmployeeDetails", {
+     const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/auth/api/adduser/editEmployeeDetails`, {
        id: selectedEmployee.emp_id,
        newDesignation: updatedData.newDesignation,
        newStatus: updatedData.newStatus,

@@ -54,7 +54,7 @@ const EmployeeTabs = () => {
   // Fetch all employees
   const fetchAllEmployees = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/adduser/getAllEmployees');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/adduser/getAllEmployees`);
       if (response.data.success) {
         const employeesData = response.data.data;
         console.log(employeesData)
@@ -191,7 +191,7 @@ const EmployeeTabs = () => {
       return;
     }
     try {
-      const response = await axios.put("http://localhost:5000/api/adduser/updateUserStatus", formData, {
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/adduser/updateUserStatus`, formData, {
         headers: { "Content-Type": "application/json" }
       });
 

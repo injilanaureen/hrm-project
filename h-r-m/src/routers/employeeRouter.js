@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from '../employeeComponents/Layout';
 import DashboardGrid from '../employeeComponents/dashbord';
-import Attendance from '../employeeComponents/attendance';
+import Attendance from '../employeeComponents/attendance/attendance';
 import CustomCalendar from '../employeeComponents/CustomCalendar';
 import TaskBox from '../employeeComponents/taskBox';
 import Employee from '../employeeComponents/employee';

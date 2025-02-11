@@ -266,8 +266,8 @@ const Layout = () => {
       </header>
 
       {/* Main Content */}
-      <main className="pt-16">
-        <div className="container mx-auto p-6">
+      <main className="pt-20">
+        <div className="ml-8 mr-8">
           <Outlet />
         </div>
       </main>
