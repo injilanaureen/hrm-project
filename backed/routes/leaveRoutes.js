@@ -1,72 +1,76 @@
 import express from "express";
-import db from "../config/dbControl.js";
-
+import Leave from "../models/Leave.js";
 const leaveRouter = express.Router();
 
-// Get all leave requests
+// 📌 Add a new leave record
+leaveRouter.post("/addedLeave", async (req, res) => {
+  try {
+    const { emp_id, earned_leave, casual_leave, sick_leave } = req.body;
+    const total_leave = earned_leave + casual_leave + sick_leave;
 
-leaveRouter.get("/totalLeave/:emp_id", function (req, res) {
-  const empId = req.params.emp_id; // Extracting the employee ID from the route parameter
-  const query = `SELECT * FROM leave_policy WHERE emp_id = ?;`;
+    const newLeave = new Leave({ emp_id, earned_leave, casual_leave, sick_leave, total_leave });
+    await newLeave.save();
 
-  db.query(query, [empId], (err, result) => {
-    if (err) {
-      return res.status(500).json({ message: "Database error", error: err });
-    }
-
-    // If the result is empty, return a meaningful response
-    if (result.length === 0) {
-      return res
-        .status(404)
-        .json({ message: `No leave data found for employee ID: ${empId}` });
-    }
-
-    // Extract and return only the total_leave value
-    const totalLeave = result[0].total_leave;
-    const earned_leave	= result[0].earned_leave;
-    const casual_leave	= result[0].casual_leave;
-    const sick_leave	= result[0].sick_leave;
-    return res.json({ total_leave: totalLeave
-    ,earned_leave: earned_leave
-    ,casual_leave: casual_leave
-    ,sick_leave: sick_leave
-     });
-  });
+    res.status(201).json({ message: "Leave record added", leave: newLeave });
+  } catch (error) {
+    res.status(500).json({ message: "Error adding leave record", error });
+  }
 });
-leaveRouter.post("/request", function (req, res) {
-  console.log(req.body); // Log the request body
 
-  const { emp_id, leave_type, start_date, end_date, days_requested, reason } = req.body;
-  const status = "Pending";
-  const date = new Date();
-  const mysqlFormattedDate = date.toISOString().slice(0, 19).replace("T", " ");
-  console.log(mysqlFormattedDate);
-
-  const insertLeave = 
-    "INSERT INTO leave_application (leave_type, leave_start_date, leave_end_date, leave_days, status, applied_date, reason, emp_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-
-  db.query(
-    insertLeave,
-    [leave_type, start_date, end_date, days_requested, status, mysqlFormattedDate, reason, emp_id],
-    function (err, result) {
-      if (err) {
-        return res.status(500).json({ message: "Database error", error: err });
-      }
-      return res.json({ message: "Leave request submitted successfully!" });
-    }
-  );
+// 📌 Get all leave records
+leaveRouter.get("/allEmployeeData", async (req, res) => {
+  try {
+    const leaves = await Leave.find();
+    res.status(200).json(leaves);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching leave records", error });
+  }
 });
-leaveRouter.get("/leaveRequests/:emp_id", function (req, res) {
-    const empId = req.params.emp_id; // Get emp_id from the request parameters
-    const query = "SELECT * FROM leave_application WHERE emp_id = ?"; // Use parameterized query
 
-    db.query(query, [empId], (err, result) => { // Pass empId as an array to prevent SQL injection
-        if (err) {
-            return res.status(500).json({ message: "Database error", error: err });
-        }
-        return res.json(result); // Send the query result as a response
-    });
+// 📌 Get a specific leave record by emp_id
+leaveRouter.get("/getSingleLeaveData/:emp_id", async (req, res) => {
+  try {
+    const leave = await Leave.findOne({ emp_id: req.params.emp_id });
+
+    if (!leave) return res.status(404).json({ message: "Leave record not found" });
+
+    res.status(200).json(leave);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching leave record", error });
+  }
 });
-;
+
+// 📌 Update leave record
+leaveRouter.put("/update/:emp_id", async (req, res) => {
+  try {
+    const { earned_leave, casual_leave, sick_leave } = req.body;
+    const total_leave = earned_leave + casual_leave + sick_leave;
+
+    const updatedLeave = await Leave.findOneAndUpdate(
+      { emp_id: req.params.emp_id },
+      { earned_leave, casual_leave, sick_leave, total_leave },
+      { new: true }
+    );
+
+    if (!updatedLeave) return res.status(404).json({ message: "Leave record not found" });
+
+    res.status(200).json({ message: "Leave record updated", leave: updatedLeave });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating leave record", error });
+  }
+});
+
+// 📌 Delete a leave record
+leaveRouter.delete("/delete/:emp_id", async (req, res) => {
+  try {
+    const deletedLeave = await Leave.findOneAndDelete({ emp_id: req.params.emp_id });
+
+    if (!deletedLeave) return res.status(404).json({ message: "Leave record not found" });
+
+    res.status(200).json({ message: "Leave record deleted" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting leave record", error });
+  }
+});
 
 export default leaveRouter;
