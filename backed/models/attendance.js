@@ -8,16 +8,16 @@ const AttendanceSchema = new mongoose.Schema({
   total_work_duration: { type: String },  // Work duration (HH:mm)
   late_by: { type: String, default: "N/A" },  // Late minutes (if applicable)
   early_out: { type: String, default: "N/A" },  // Early leaving time
-  record_clock_in: { type: Boolean, default: true },  // Marked when employee clocks in
-  record_clock_out: { type: Boolean, default: false },  // Marked when employee clocks out
-  status: { type: String, enum: ["Present", "Leave", "Half day"], default: "Present" }, // Attendance status
+  status: { type: String, enum: ["Present", "Leave", "Half day","Absent"]}, // Attendance status
+  leaveType: { type: String, enum: ["Casual Leave", "Sick Leave", "Earned Leave"] }, 
   lateStatus:{ type: String},
-  leaveReason:{ type: String},
-  leaveType:{ type: String},
-  leaveStartDate:{ type: Date},
-  leaveEndDate:{ type: Date},
-  leaveStatus:{ type: String},
-
+  earlyStatus:{ type: String},
+  halfDay:{ type: String},
+  halfDayPeriod:{ type: String, enum: ["First half", "Second half"]},
+  shortLeave: { type: String},
+  shortLeaveReason: { type: String},
+  shortLeavePeriod: { type: String, enum: ["Morning", "Evening"]},
+ 
 });
 
 // Create a unique index for emp_id + date (to prevent duplicate records for the same day)
