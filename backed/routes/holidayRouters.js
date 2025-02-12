@@ -22,22 +22,37 @@ addHoliday.post("/add", async (req, res) => {
     res.status(500).json({ message: "Error adding holiday", error });
   }
 });
+
 addHoliday.get("/holidays", async (req, res) => {
-    try {
-      const { month } = req.query; // Get month from query parameters
-  
-      let filter = {};
-      if (month) {
-        const monthsArray = month.split(",").map(m => m.trim()); // Convert comma-separated values into an array
-        filter = { month: { $in: monthsArray } };
+  try {
+    const { date } = req.query;
+    console.log(date)
+
+    if (date) {
+      // Extract month and day from date
+      const parsedDate = new Date(date);
+      const month = parsedDate.toLocaleString("en-US", { month: "long" }); // e.g., "March"
+      const day = parsedDate.getDate().toString(); // e.g., "14"
+
+      // Find holiday by month and day
+      const holiday = await Holiday.findOne({ month, day });
+
+      if (holiday) {
+        return res.json(holiday);
+      } else {
+        return res.status(200).json({ message: "No holiday on this date" });
       }
-  
-      const holidays = await Holiday.find(filter);
-      res.status(200).json(holidays);
-    } catch (error) {
-      res.status(500).json({ message: "Error fetching holidays", error });
-    }
-  });
+    } 
+
+    // If no date is provided, return all holidays
+    const holidays = await Holiday.find();
+    res.json(holidays);
+
+  } catch (error) {
+    console.error("Error fetching holiday:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
   // UPDATE a holiday by ID
 addHoliday.put("/update-holidays/:id", async (req, res) => {
     try {
@@ -54,6 +69,16 @@ addHoliday.put("/update-holidays/:id", async (req, res) => {
       res.status(200).json(updatedHoliday);
     } catch (error) {
       res.status(500).json({ message: "Error updating holiday", error });
+    }
+  });
+  //all holidays
+  addHoliday.get("/holidays", async (req, res) => {
+    try {
+      const holidays = await Holiday.find(); // Fetch all holidays from the database
+      res.json(holidays);
+    } catch (error) {
+      console.error("Error fetching holidays:", error);
+      res.status(500).json({ error: "Internal Server Error" });
     }
   });
   // Delete Holiday by ID

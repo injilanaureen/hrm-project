@@ -1,6 +1,7 @@
 import express from 'express';
 import Attendance from '../models/attendance.js';
 import Shift from '../models/shiftingData.js';
+import Holiday from '../models/holidayList.js';
 const addAttendance = express.Router();
 
 
@@ -65,77 +66,135 @@ addAttendance.get("/getShift", async (req, res) => {
   });
 
  
+  // addAttendance.post("/addAttendance", async (req, res) => {
+  //   try {
+  //     const { emp_id, date, time_in } = req.body;
+  
+  //     if (!emp_id || !date || !time_in) {
+  //       return res.status(400).json({ message: "emp_id, date, and time_in are required" });
+  //     }
+  
+  //     // Find the employee's shift
+  //     const shift = await Shift.findOne();
+  //     if (!shift) {
+  //       return res.status(404).json({ message: "Shift data not found for employee" });
+  //     }
+  
+  //     const timeInMinutes = convertToMinutes(time_in);
+  //     const shiftInMinutes = convertToMinutes(shift.shift_in);
+  //     const graceLimit = convertToMinutes("10:30"); // 10:30 AM grace limit
+  //     const lateHalfDayLimit = convertToMinutes("10:10"); // Half-day if 6th late arrival and before 10:10 AM
+  //     const fullDayAbsenceLimit = convertToMinutes("14:00"); // Mark absent if after 2:00 PM
+  
+  //     let status = "Present";
+  //     let late_by = "N/A";
+  
+  //     if (timeInMinutes > shiftInMinutes) {
+  //       late_by = formatMinutes(timeInMinutes - shiftInMinutes);
+  //     }
+  
+  //     // Fetch employee's past attendance to track late arrivals
+  //     const pastLateCount = await Attendance.countDocuments({
+  //       emp_id,
+  //       late_by: { $ne: "N/A" },
+  //       date: { $regex: `^${date.substring(0, 7)}` } // Matches current month
+  //     });
+  
+  //     if (timeInMinutes > shiftInMinutes) {
+  //       if (pastLateCount > 5) {
+  //         if (timeInMinutes <= lateHalfDayLimit) {
+  //           status = "Half-Day";
+  //         } else if (timeInMinutes >= fullDayAbsenceLimit) {
+  //           status = "Absent";
+  //         } else {
+  //           status = "Late";
+  //         }
+  //       } else if (timeInMinutes <= graceLimit) {
+  //         status = "Present"; // Still within grace period
+  //       } else {
+  //         status = "Late";
+  //       }
+  //     }
+  
+  //     const newAttendance = new Attendance({
+  //       emp_id,
+  //       date,
+  //       time_in,
+  //       time_out: "N/A",
+  //       total_work_duration: "N/A",
+  //       late_by,
+  //       early_out: "N/A",
+  //       record_clock_in: true,
+  //       record_clock_out: false,
+  //       status
+  //     });
+  
+  //     await newAttendance.save();
+  
+  //     res.status(201).json({ message: "Attendance saved successfully", data: newAttendance });
+  //   } catch (error) {
+  //     console.error("Error saving attendance:", error);
+  //     res.status(500).json({ message: "Server error", error: error.message });
+  //   }
+  // });
   addAttendance.post("/addAttendance", async (req, res) => {
-    try {
-      const { emp_id, date, time_in } = req.body;
+    console.log(req.body);
+
+    // try {
+      // const {
+      //   emp_id,
+      //   date,
+      //   time_in,
+      //   time_out,
+      //   total_work_duration,
+      //   late_by,
+      //   early_out,
+      //   status,
+      //   leaveType,
+      //   earlyStatus,
+      //   lateStatus,
+      //   halfDayStatus,
+      //   halfDayPeriod,
+      //   shortLeaveStatus,
+      //   shortLeavePeriod
+      // } = req.body;
+
+
+    //   // Validate required fields
+    //   if (!emp_id || !date || !status) {
+    //     return res.status(400).json({ message: "emp_id, date, and status are required" });
+    //   }
   
-      if (!emp_id || !date || !time_in) {
-        return res.status(400).json({ message: "emp_id, date, and time_in are required" });
-      }
+    //   // Prepare the attendance object with the exact data received from the frontend
+    //   const newAttendance = new Attendance({
+    //     emp_id,
+    //     date,
+    //     time_in: time_in || "N/A",
+    //     time_out: time_out || "N/A",
+    //     total_work_duration: total_work_duration || "N/A",
+    //     late_by: late_by || "N/A",
+    //     early_out: early_out || "N/A",
+    //     status,
+    //     leaveType,
+    //     earlyStatus,
+    //     lateStatus,
+    //     halfDayStatus,
+    //     halfDayPeriod,
+    //     shortLeaveStatus,
+    //     shortLeavePeriod
+    //   });
   
-      // Find the employee's shift
-      const shift = await Shift.findOne();
-      if (!shift) {
-        return res.status(404).json({ message: "Shift data not found for employee" });
-      }
+    //   await newAttendance.save();
   
-      const timeInMinutes = convertToMinutes(time_in);
-      const shiftInMinutes = convertToMinutes(shift.shift_in);
-      const graceLimit = convertToMinutes("10:30"); // 10:30 AM grace limit
-      const lateHalfDayLimit = convertToMinutes("10:10"); // Half-day if 6th late arrival and before 10:10 AM
-      const fullDayAbsenceLimit = convertToMinutes("14:00"); // Mark absent if after 2:00 PM
-  
-      let status = "Present";
-      let late_by = "N/A";
-  
-      if (timeInMinutes > shiftInMinutes) {
-        late_by = formatMinutes(timeInMinutes - shiftInMinutes);
-      }
-  
-      // Fetch employee's past attendance to track late arrivals
-      const pastLateCount = await Attendance.countDocuments({
-        emp_id,
-        late_by: { $ne: "N/A" },
-        date: { $regex: `^${date.substring(0, 7)}` } // Matches current month
-      });
-  
-      if (timeInMinutes > shiftInMinutes) {
-        if (pastLateCount >= 5) {
-          if (timeInMinutes <= lateHalfDayLimit) {
-            status = "Half-Day";
-          } else if (timeInMinutes >= fullDayAbsenceLimit) {
-            status = "Absent";
-          } else {
-            status = "Late";
-          }
-        } else if (timeInMinutes <= graceLimit) {
-          status = "Present"; // Still within grace period
-        } else {
-          status = "Late";
-        }
-      }
-  
-      const newAttendance = new Attendance({
-        emp_id,
-        date,
-        time_in,
-        time_out: "N/A",
-        total_work_duration: "N/A",
-        late_by,
-        early_out: "N/A",
-        record_clock_in: true,
-        record_clock_out: false,
-        status
-      });
-  
-      await newAttendance.save();
-  
-      res.status(201).json({ message: "Attendance saved successfully", data: newAttendance });
-    } catch (error) {
-      console.error("Error saving attendance:", error);
-      res.status(500).json({ message: "Server error", error: error.message });
-    }
+    //   res.status(201).json({ message: "Attendance saved successfully", data: newAttendance });
+    // } catch (error) {
+    //   console.error("Error saving attendance:", error);
+    //   res.status(500).json({ message: "Server error", error: error.message });
+    // }
+
   });
+  
+  
   
 
   // Utility function to convert time (HH:mm) to minutes
@@ -293,7 +352,39 @@ addAttendance.put("/updateAttendance/:id", async (req, res) => {
       res.status(500).json({ message: "Server error", error: error.message });
     }
   });
-  
+  addAttendance.get("/lateCounts", async (req, res) => {
+    try {
+        const currentMonth = new Date().toISOString().slice(0, 7); // Get "YYYY-MM"
+
+        // Count late arrivals per employee based on lateStatus
+        const lateCounts = await Attendance.aggregate([
+            {
+                $match: {
+                    lateStatus: "Late",  // ✅ Use lateStatus instead of status
+                    date: { $regex: `^${currentMonth}` } // Match dates in current month
+                }
+            },
+            {
+                $group: {
+                    _id: "$emp_id",
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // Convert array to object { emp_id: count }
+        const lateCountMap = {};
+        lateCounts.forEach(({ _id, count }) => {
+            lateCountMap[_id] = count;
+        });
+
+        res.json(lateCountMap);
+    } catch (error) {
+        console.error("Error fetching late counts:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
+
   addAttendance.get("/getSingleAttendance/:id", async (req, res) => {
     try {
       const { id } = req.params;
