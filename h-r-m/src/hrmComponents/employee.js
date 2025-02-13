@@ -154,7 +154,7 @@ function Employee() {
 
   const fetchRolePermissions = async (roleId) => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/auth/api/adduser/getRolePermissions?role_id=${roleId}`);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/adduser/getRolePermissions?role_id=${roleId}`);
       if (response.data.success) {
         setFormData(prev => ({
           ...prev,

@@ -15,7 +15,7 @@ const ShortLeaveForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:5000/api/apply-short-leave", {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/apply-short-leave`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

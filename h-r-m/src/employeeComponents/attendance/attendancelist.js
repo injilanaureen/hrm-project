@@ -1,20 +1,31 @@
-const AttendanceList = () => {
-  const attendanceData = [
-    { date: '26 Jan 2025, Sun', status: 'Weekly Off' },
-    { date: '27 Jan 2025, Mon', status: 'On Leave (Earned Leave)' },
-    {
-      date: '28 Jan 2025, Tue',
-      timeIn: '10:17:09',
-      timeOut: '19:18:34',
-      totalWork: '09:01:25',
-      lateBy: '00:17:09',
-      recordedClockIn: '10:17:09',
-      recordedClockOut: '19:18:34',
-      status: 'Present',
-    },
-    // Add more data as needed
-  ];
-
+import { useEffect } from "react";
+ 
+const AttendanceList = ({ attendanceData }) => {
+  useEffect(() => {
+    console.log("Attendance Data:", attendanceData);
+  }, [attendanceData]);
+  const calculateTotalWork = (timeIn, timeOut) => {
+    if (!timeIn || !timeOut) return '-';
+ 
+    const [inHours, inMinutes] = timeIn.split(':').map(Number);
+    const [outHours, outMinutes] = timeOut.split(':').map(Number);
+ 
+    const inDate = new Date();
+    inDate.setHours(inHours, inMinutes, 0);
+ 
+    const outDate = new Date();
+    outDate.setHours(outHours, outMinutes, 0);
+ 
+    const diffMs = outDate.getTime() - inDate.getTime();
+    if (diffMs < 0) return '-'; // Agar time out pehle ka ho, invalid case
+ 
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+ 
+    return `${hours}h ${minutes}m`;
+  };
+ 
+ 
   return (
     <div>
       {/* Legend */}
@@ -32,10 +43,10 @@ const AttendanceList = () => {
           <span>Weekly Off</span>
         </div>
       </div>
-
+ 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full border">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-4 py-2 text-left">DATE</th>
@@ -51,73 +62,78 @@ const AttendanceList = () => {
             </tr>
           </thead>
           <tbody>
-            {attendanceData.map((row, index) => (
-              <tr key={index} className="border-b">
-                <td className="px-4 py-2">{row.date}</td>
-                <td className="px-4 py-2">{row.timeIn || '-'}</td>
-                <td className="px-4 py-2">{row.timeOut || '-'}</td>
-                <td className="px-4 py-2">{row.totalWork || '-'}</td>
-                <td className="px-4 py-2">{row.lateBy || '-'}</td>
-                <td className="px-4 py-2">{row.recordedClockIn || '-'}</td>
-                <td className="px-4 py-2">{row.recordedClockOut || '-'}</td>
-                <td className="px-4 py-2">
-                  <span
-                    className={`${
-                      row.status === 'Weekly Off'
-                        ? 'text-purple-600'
-                        : row.status.includes('Leave')
-                        ? 'text-green-600'
-                        : 'text-black'
-                    }`}
-                  >
-                    {row.status}
-                  </span>
-                </td>
-                <td className="px-4 py-2">
-                  <div className="flex gap-2">
-                    <button className="p-1 text-gray-500 hover:text-gray-700">
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                        />
-                      </svg>
+            {attendanceData && attendanceData.length > 0 ? (
+              attendanceData.map((row, index) => (
+                <tr key={index} className="border-b">
+                  <td className="px-4 py-2">{row.date}</td>
+                  <td className="px-4 py-2">{row.time_in || '-'}</td>
+                  <td className="px-4 py-2">{row.time_out || '-'}</td>
+                  <td className="px-4 py-2">{calculateTotalWork(row.time_in, row.time_out)}</td>
+                  <td className="px-4 py-2">{row.late_by || '-'}</td>
+                  <td className="px-4 py-2">{row.recordedClockIn || '-'}</td>
+                  <td className="px-4 py-2">{row.recordedClockOut || '-'}</td>
+                  <td className="px-4 py-2">
+                    <span
+                      className={  `flex gap-1 ${
+                        row.status === 'Weekly Off'
+                          ? 'text-purple-600'
+                          : row.status.includes('Leave')
+                          ? 'text-green-600'
+                          : 'text-black'
+                        
+                      }`}
+                    >
+                      <span>{row.status}</span> 
+                      {row.status === 'Leave' && (
+  <span className="text-purple-600 font-semibold">{row.leaveType}</span>
+)}
+
+{row.lateStatus === 'Late' && (
+  <span className="text-yellow-600 font-semibold">(Late)</span>
+)}
+
+{row.earlyStatus === 'On Time' && (
+  <span className="text-green-600 font-semibold">(On Time)</span>
+)}
+
+{row.halfDayStatus === 'Half-Day' && (
+  <span className="text-orange-600 font-semibold">(Half-Day)</span>
+)}
+
+                      <span>{row.Status ===''}</span>
+                    </span>
+                  </td>
+                  <td className="px-4 py-2">
+                    <div className="flex gap-2">
+                      <button className="p-1 text-gray-500 hover:text-gray-700">
+                        ✏️
+                      </button>
+                      <button className="p-1 text-gray-500 hover:text-gray-700">
+                        🗑️
+                      </button>
+                    </div>
+                  </td>
+                  <td className="px-4 py-2">
+                    <button className="text-blue-600 hover:text-blue-800">
+                      View
                     </button>
-                    <button className="p-1 text-gray-500 hover:text-gray-700">
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </td>
-                <td className="px-4 py-2">
-                  <button className="text-blue-600 hover:text-blue-800">
-                    View
-                  </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="10" className="text-center py-4">
+                  No attendance data available
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
     </div>
   );
 };
+ 
 export default AttendanceList;
+ 
+ 

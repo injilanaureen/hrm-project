@@ -74,7 +74,7 @@ const Tab1Component = () => {
     const fetchTotalLeave = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/leave/getSingleLeaveData/${user.emp_id}`
+          `${process.env.REACT_APP_API_URL}/api/leave/getSingleLeaveData/${user.emp_id}`
         );
         console.log("Leave Requests:", response.data);
         setLeaveBalance({
@@ -105,7 +105,7 @@ const Tab1Component = () => {
       const fetchLeaveRequests = async () => {
         try {
           const response = await axios.get(
-            `http://localhost:5000/api/leave/leave-requests/${user.emp_id}`
+            `${process.env.REACT_APP_API_URL}/api/leave/leave-requests/${user.emp_id}`
           );
          
           
@@ -206,7 +206,7 @@ const handleSubmit = async (e) => {
 
   try {
     const response = await axios.post(
-      "http://localhost:5000/api/leave/apply-leave",
+      "https://hrmbackend-vjqy.onrender.com/api/leave/apply-leave",
       leaveRequest
     );
 

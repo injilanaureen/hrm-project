@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { UserCheck, UserX, CalendarX } from "lucide-react";
+import { Pencil } from 'lucide-react';
+import { AttendanceModal, AttendanceButton } from "./attendanceModel";
+import  {DisplayAttendance} from "./displayAttendance";
+
 
 const Attendance = () => {
   const today = new Date().toISOString().split("T")[0];
+  const [showModal, setShowModal] = useState(false);
   const [employees, setEmployees] = useState([]);
   const [leaveData, setLeaveData] = useState([]);
   const [attendance, setAttendance] = useState({});
@@ -11,28 +15,26 @@ const Attendance = () => {
   const [holidayName, setHolidayName] = useState(null);
   const [weeklyOff, setWeeklyOff] = useState(null);
   const [punchInTime, setPunchInTime] = useState({});
-
   const [timeoutData, setTimeoutData] = useState({});
   const [selectedDate, setSelectedDate] = useState(today);
   const [loading, setLoading] = useState(true);
-  const attendanceData = {
-    emp_id:"", // Replace with actual employee ID
-    date: "", // Current date (YYYY-MM-DD)
-    time_in: "", // Employee clock-in time
-    time_out: null, // Employee clock-out time // Work hours calculated
-    status: "", // Attendance status
-    holidayName: "", // If it's a holiday, set the name
-    leaveType: "", // If on leave, specify the type   
-    shortLeaveStatus: "", // Short leave status
-    shortLeavePeriod: "" // If short leave, specify morning/evening
-  };
-
+  // const attendanceData = {
+  //   emp_id:"", // Replace with actual employee ID
+  //   date: "", // Current date (YYYY-MM-DD)
+  //   time_in: "", // Employee clock-in time
+  //   time_out: null, // Employee clock-out time // Work hours calculated
+  //   status: "", // Attendance status
+  //   holidayName: "", // If it's a holiday, set the name
+  //   leaveType: "", // If on leave, specify the type   
+  //   shortLeaveStatus: "", // Short leave status
+  //   shortLeavePeriod: "" // If short leave, specify morning/evening
+  // };
 
   // Fetch Employees
   const fetchAllEmployees = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/api/adduser/getAllEmployees");
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/adduser/getAllEmployees`);
       const data = await response.json();
       if (data.success) {
         const allEmployees = data.data.filter((emp) => emp.role_id !== 1);
@@ -49,20 +51,36 @@ const Attendance = () => {
     try {
       setLoading(true);
       const [leaveResponse, shortLeaveResponse] = await Promise.all([
-        axios.get("http://localhost:5000/api/leave/leave-requests"),
-        axios.get("http://localhost:5000/api/leave/short-leaves"),
+        axios.get(`${process.env.REACT_APP_API_URL}/api/leave/leave-requests`),
+        axios.get(`${process.env.REACT_APP_API_URL}/api/leave/short-leaves`),
       ]);
 
       const approvedLeaves = leaveResponse?.data?.filter((leave) => leave.leaveStatus === "Approved") ?? [];
       const approvedShortLeaves = shortLeaveResponse?.data?.filter((leave) => leave.leaveStatus === "Approved") ?? [];
+      console.log(approvedLeaves)
       // console.log(approvedShortLeaves)
 
       // Filter leaves based on the selected date
       const filtered = [...approvedLeaves, ...approvedShortLeaves].filter((leave) => {
-        const startDate = new Date(leave.leaveStartDate).toISOString().split("T")[0];
-        const endDate = new Date(leave.leaveEndDate).toISOString().split("T")[0];
+        if (!leave.leaveStartDate || !leave.leaveEndDate) {
+          console.warn("Invalid leave date:", leave); // Debugging
+          return false; // Skip invalid dates
+        }
+      
+        const startDateObj = new Date(leave.leaveStartDate);
+        const endDateObj = new Date(leave.leaveEndDate);
+      
+        if (isNaN(startDateObj) || isNaN(endDateObj) || endDateObj < startDateObj) {
+          console.warn("Invalid leave period:", leave); // Debugging
+          return false; // Skip incorrect date ranges
+        }
+      
+        const startDate = startDateObj.toISOString().split("T")[0];
+        const endDate = endDateObj.toISOString().split("T")[0];
+      
         return selectedDate >= startDate && selectedDate <= endDate;
       });
+      
 
       setLeaveData(filtered);
     } catch (error) {
@@ -73,7 +91,7 @@ const Attendance = () => {
   };
   const fetchWeeklyOff = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/attendance/getShift");
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/attendance/getShift`);
   
       if (Array.isArray(response.data) && response.data.length > 0) {
         const weekOffDay = response.data[0].week_off?.trim(); // Access first object in the array
@@ -88,12 +106,9 @@ const Attendance = () => {
     }
   };
   
-  
-  
-
   const fetchHolidayData = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/holiday/holidays?date=${selectedDate}`);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/holiday/holidays?date=${selectedDate}`);
       
       if (response.data.message === "No holiday on this date") {
         setHoliday(null);
@@ -106,8 +121,6 @@ const Attendance = () => {
       setHoliday(null);
     }
   };
-  
-
 
   useEffect(() => {
     fetchLeaveData();
@@ -120,9 +133,6 @@ const Attendance = () => {
     fetchWeeklyOff();
   }, []);
 
-  useEffect(() => {
-    fetchLeaveData();
-  }, [selectedDate]);
 
   // Update Attendance State
   useEffect(() => {
@@ -146,6 +156,11 @@ const Attendance = () => {
         else if (weeklyOff && selectedDay === weeklyOff) {
           updatedAttendance[emp.emp_id] = "Weekly Off";
         } 
+
+          // Check if employee is on leave
+    else if (leave) {
+      updatedAttendance[emp.emp_id] = `Leave (${leave.leaveType})`;
+    }
         // Otherwise, check leave or mark as absent
         else {
           updatedAttendance[emp.emp_id] = leave ? `Leave` : "Absent";
@@ -154,7 +169,7 @@ const Attendance = () => {
   
       return updatedAttendance;
     });
-  }, [employees, leaveData, selectedDate, holiday, weeklyOff]); 
+      }, [employees, leaveData, selectedDate, holiday, weeklyOff]); 
   
   const handlePunchInChange = (emp_id, field, value) => {
     setPunchInTime((prev) => ({
@@ -209,7 +224,7 @@ const Attendance = () => {
   
     try {
       // Fetch late arrival count for each employee from backend
-      const lateCountsResponse = await fetch("http://localhost:5000/api/attendance/lateCounts");
+      const lateCountsResponse = await fetch(`${process.env.REACT_APP_API_URL}/api/attendance/lateCounts`);
       const pastLateCounts = await lateCountsResponse.json(); // Assuming it returns an object { emp_id: count }
   
       const formattedData = employees.map((employee) => {
@@ -222,8 +237,7 @@ const Attendance = () => {
         let leaveType="";
         let earlyStatus="N/A";
         let late_by = "N/A";
-        let halfDayStatus = "";
-        let halfDayPeriod = "";
+
     
         if (attendanceStatus === "Leave") {
           leaveType = attendance[employee.emp_id] || "Annual Leave"; // ✅ Assign correct leave type
@@ -291,7 +305,7 @@ const Attendance = () => {
   
       console.log(formattedData);
   
-      const response = await fetch("http://localhost:5000/api/attendance/addAttendance", {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/attendance/addAttendance`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ attendances: formattedData }), // Send as an object with an array
@@ -411,6 +425,21 @@ const Attendance = () => {
                         <span className="text-gray-500">-</span>
                       )}
                     </td>
+                    <td>
+    <Pencil 
+        className="cursor-pointer text-blue-500" 
+        onClick={() => setShowModal(true)} 
+    />
+    {showModal && (
+        <AttendanceModal
+            showModal={showModal}
+            setShowModal={setShowModal}
+            onClose={() => setShowModal(false)}
+            emp_id={emp_id}
+            selectedDate={selectedDate}
+        />
+    )}
+</td>
                   </tr>
                 );
               })
@@ -431,6 +460,13 @@ const Attendance = () => {
           Submit Attendance
         </button>
       </div>
+      <h1>fghb</h1>
+      { 
+                <DisplayAttendance 
+               
+                selectedDate={selectedDate}
+                />
+            }
     </div>
   );
 };

@@ -22,7 +22,7 @@ const ShortLeaveForm = () => {
 
   const fetchShortLeaves = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/leave/short-leaves/${user.emp_id}`);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/leave/short-leaves/${user.emp_id}`);
       
       setShortLeaves(response.data);
     } catch (error) {
@@ -39,7 +39,7 @@ const ShortLeaveForm = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const response = await axios.post("http://localhost:5000/api/leave/apply-short-leave", formData);
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/leave/apply-short-leave`, formData);
       setFeedback({ type: "success", message: response.data.message });
       fetchShortLeaves();
       setFormData({ emp_id: user.emp_id, shortLeaveDate: "", shortLeavePeriod: "", shortLeaveReason: "" });

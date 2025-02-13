@@ -149,7 +149,7 @@ const HRMLeaveManagement = () => {
     const fetchShortRequests = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/leave/short-leaves"
+          `${process.env.REACT_APP_API_URL}/api/leave/short-leaves`
         );
         console.log(response.data);
         setShortLeaveRequest(response.data);
@@ -164,7 +164,7 @@ const HRMLeaveManagement = () => {
     const fetchLeaveRequests = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/leave/leave-requests"
+          `${process.env.REACT_APP_API_URL}/api/leave/leave-requests`
         );
         setLeaveRequests(response.data);
       } catch (error) {
@@ -182,7 +182,7 @@ const HRMLeaveManagement = () => {
         if (empIds.length === 0) return;
         const empIdsString = empIds.join(",");
         const response = await axios.get(
-          `http://localhost:5000/api/leave/fetch/employee?emp_ids=${empIdsString}`
+          `${process.env.REACT_APP_API_URL}/api/leave/fetch/employee?emp_ids=${empIdsString}`
         );
         setEmployee(response.data);
       } catch (error) {
@@ -200,7 +200,7 @@ const HRMLeaveManagement = () => {
     console.log(id);
 
     try {
-      await axios.put(`http://localhost:5000/api/leave/updatedLeaveBalance`, {
+      await axios.put(`${process.env.REACT_APP_API_URL}/api/leave/updatedLeaveBalance`, {
         id,
         leaveRequests,
         newStatus,
@@ -211,7 +211,7 @@ const HRMLeaveManagement = () => {
   };
   const handleStatusChangeRejected = async (id, newStatus) => {
     try {
-      await axios.put(`http://localhost:5000/api/leave/RejectedLeave`, {
+      await axios.put(`${process.env.REACT_APP_API_URL}/api/leave/RejectedLeave`, {
         id,
         newStatus,
       });
@@ -222,7 +222,7 @@ const HRMLeaveManagement = () => {
 
   const shortLeaveFunctionByApproved = async (id) => {
     try {
-      const response = await axios.put(`http://localhost:5000/api/leave/updated-Short-leaves/${id}`);
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/leave/updated-Short-leaves/${id}`);
   
       if (response.status === 200) {
         alert("Leave status updated successfully!");
@@ -236,7 +236,7 @@ const HRMLeaveManagement = () => {
   };
   const shortLeaveFunctionByRejected = async (id) => {
     try {
-      const response = await axios.put(`http://localhost:5000/api/leave/updated-Short-leaves-Rejected/${id}`);
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/leave/updated-Short-leaves-Rejected/${id}`);
   
       if (response.status === 200) {
         alert("Leave status updated successfully!");

@@ -10,9 +10,10 @@ const MainRouter = () => {
       <Router>  {/* Set up routing */}
         <Routes>
           <Route path="/login" element={<Login />} />  {/* Login page route */}
-          <Route path="/*" element={ <ProtectedRoute>
-            <RoleBasedRouter />  {/* Role-based routing */}
-          </ProtectedRoute>} />  {/* Protected route */}
+          <Route path="/*" element={ 
+            <RoleBasedRouter />  
+        
+        } />  {/* Protected route */}
         </Routes>
       </Router>
     </AuthProvider>

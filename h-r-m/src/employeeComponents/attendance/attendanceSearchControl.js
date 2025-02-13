@@ -1,11 +1,11 @@
 import React from 'react';
 import { FileText, CalendarDays, List } from 'lucide-react';
-
-const SearchControls = ({ 
-  onhandleCalender, 
-  onhandleList, 
-  attendanceCalender, 
-  attendancelist 
+ 
+const SearchControls = ({
+  onhandleCalender,
+  onhandleList,
+  attendanceCalender,
+  attendancelist
 }) => {
   return (
     <div className="flex justify-between items-center mb-6">
@@ -20,7 +20,7 @@ const SearchControls = ({
           ONE VIEW
         </button>
       </div>
-
+ 
       {/* Right section: Filters and Buttons */}
       <div className="flex gap-2">
         <div className="px-4 py-1 border border-gray-200 rounded-sm">
@@ -38,7 +38,7 @@ const SearchControls = ({
         <button className="px-4 py-1 text-sm font-semibold text-indigo-400 border border-gray-200 rounded-sm">
           REGULARIZE
         </button>
-
+ 
         {/* Calendar and List buttons */}
         <div className="flex border border-indigo-400">
           {/* Calendar Button */}
@@ -49,7 +49,7 @@ const SearchControls = ({
               <CalendarDays className={`text-xl ${attendanceCalender ? 'text-white' : 'text-indigo-400'}`} />
             </button>
           </div>
-
+ 
           {/* List Button */}
           <div
             className={`px-4 py-1 cursor-pointer ${attendancelist ? 'bg-indigo-400' : ''}`}
@@ -63,5 +63,7 @@ const SearchControls = ({
     </div>
   );
 };
-
+ 
 export default SearchControls;
+ 
+ 
