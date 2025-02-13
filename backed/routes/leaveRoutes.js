@@ -1,7 +1,6 @@
 import express from "express";
 import Leave from "../models/Leave.js";
 import RequestLeaves from "../models/ApplyLeave.js";
-
 import User from "../models/User.js";
 import ShortLeave from "../models/ShortLeave.js";
 const leaveRouter = express.Router();
