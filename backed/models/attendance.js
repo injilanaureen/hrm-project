@@ -8,14 +8,14 @@ const AttendanceSchema = new mongoose.Schema({
   total_work_duration: { type: String },  // Work duration (HH:mm)
   late_by: { type: String, default: "N/A" },  // Late minutes (if applicable)
   early_out: { type: String, default: "N/A" },  // Early leaving time
-  status: { type: String, enum: ["Present", "Leave", "Half day","Absent"]}, // Attendance status
+  status: { type: String, enum: ["Present", "Leave", "Absent", "Weekly Off", "Holiday"]}, // Attendance status
+  holidayName: { type: String, required: false},
   leaveType: { type: String, enum: ["Casual Leave", "Sick Leave", "Earned Leave"] }, 
-  lateStatus:{ type: String},
   earlyStatus:{ type: String},
-  halfDay:{ type: String},
+  lateStatus:{ type: String},
+  halfDayStatus:{ type: String},
   halfDayPeriod:{ type: String, enum: ["First half", "Second half"]},
-  shortLeave: { type: String},
-  shortLeaveReason: { type: String},
+  shortLeaveStatus: { type: String},
   shortLeavePeriod: { type: String, enum: ["Morning", "Evening"]},
  
 });

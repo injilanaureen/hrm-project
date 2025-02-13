@@ -138,6 +138,7 @@ leaveRouter.get("/leave-requests", async (req, res) => {
   try {
     const leaveRequests = await RequestLeaves.find().sort({ leaveApplydate: -1 }); // Sort by latest applied
     res.status(200).json(leaveRequests);
+    // console.log(leaveRequests)
   } catch (error) {
     console.error("Error fetching leave requests:", error);
     res.status(500).json({ message: "Server error, please try again later." });
@@ -291,6 +292,7 @@ const getFirstDayOfMonth = () => {
 };
 
 // Route to apply for short leave
+
 leaveRouter.post("/apply-short-leave", async (req, res) => {
   try {
     const { emp_id, shortLeaveDate, shortLeavePeriod, shortLeaveReason } = req.body;
@@ -414,6 +416,7 @@ leaveRouter.put("/updated-Short-leaves-Rejected/:id", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
 
 
 
