@@ -1,6 +1,7 @@
 import express from "express";
 import Leave from "../models/Leave.js";
 import RequestLeaves from "../models/ApplyLeave.js";
+
 import User from "../models/User.js";
 import ShortLeave from "../models/ShortLeave.js";
 const leaveRouter = express.Router();
@@ -165,6 +166,7 @@ leaveRouter.get("/leave-requests/:emp_id", async (req, res) => {
 });
 
 
+
 //fetch employee information in master branch
 
 leaveRouter.get("/fetch/employee", async (req, res) => {
@@ -288,16 +290,19 @@ const getFirstDayOfMonth = () => {
   const now = new Date();
   return new Date(now.getFullYear(), now.getMonth(), 1);
 };
- 
+
 // Route to apply for short leave
 leaveRouter.post("/apply-short-leave", async (req, res) => {
   try {
     const { emp_id, shortLeaveDate, shortLeavePeriod, shortLeaveReason } = req.body;
+
  
     if (!emp_id || !shortLeaveDate || !shortLeavePeriod || !shortLeaveReason) {
       return res.status(400).json({ message: "All fields are required!" });
     }
  
+
+  
     // Validate short leave timing
     let shortLeaveTime = "";
     if (shortLeavePeriod === "Morning") {
@@ -307,7 +312,7 @@ leaveRouter.post("/apply-short-leave", async (req, res) => {
     } else {
       return res.status(400).json({ message: "Invalid short leave period!" });
     }
- 
+
     // Count how many short leaves this employee has taken this month
     const firstDayOfMonth = getFirstDayOfMonth();
     const shortLeaveCount = await ShortLeave.countDocuments({
@@ -315,12 +320,11 @@ leaveRouter.post("/apply-short-leave", async (req, res) => {
       shortLeaveDate: { $gte: firstDayOfMonth.toISOString().split("T")[0] },
       leaveStatus: { $ne: "Rejected" },  // Count only approved/pending leaves
     });
- 
+
     // Allow only 2 short leaves per month
     if (shortLeaveCount >= 2) {
       return res.status(400).json({ message: "You have already taken 2 short leaves this month!" });
     }
- 
     // Create new short leave request
     const newShortLeave = new ShortLeave({
       emp_id,
@@ -330,16 +334,18 @@ leaveRouter.post("/apply-short-leave", async (req, res) => {
       shortLeaveReason,
       shortLeaveCount: shortLeaveCount + 1,
     });
+
  
     await newShortLeave.save();
     res.status(201).json({ message: "Short leave request submitted successfully!" });
  
+
   } catch (error) {
     console.error("Error applying short leave:", error);
     res.status(500).json({ message: "Server error. Please try again later." });
   }
 });
- 
+
 //all short leaves
 leaveRouter.get("/short-leaves", async (req, res) => {
   try {
@@ -350,15 +356,16 @@ leaveRouter.get("/short-leaves", async (req, res) => {
     res.status(500).json({ message: "Server error. Please try again later." });
   }
 });
- 
+
 //fetch short leave for one employee
 leaveRouter.get("/short-leaves/:emp_id", async (req, res) => {
   try {
     const { emp_id } = req.params;
+
     console.log("Fetching leaves for:", emp_id);
 
+    
     const employeeLeaves = await ShortLeave.find({ emp_id });
-    console.log("Fetched Leaves:", employeeLeaves);
 
     res.status(200).json(employeeLeaves);
   } catch (error) {
@@ -366,10 +373,6 @@ leaveRouter.get("/short-leaves/:emp_id", async (req, res) => {
     res.status(500).json({ message: "Server error. Please try again later." });
   }
 });
-
-
-
-
 leaveRouter.put("/updated-Short-leaves/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -412,11 +415,6 @@ leaveRouter.put("/updated-Short-leaves-Rejected/:id", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
-
-
-
-
 
 
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { ArrowLeft }   from 'lucide-react';
 import Tab1Component from "./leave/tab1";
 import ShortLeaveForm from "./leave/shortLeave";

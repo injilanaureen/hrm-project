@@ -6,7 +6,7 @@ import Attendance from '../employeeComponents/attendance/attendance';
 import CustomCalendar from '../employeeComponents/CustomCalendar';
 import TaskBox from '../employeeComponents/taskBox';
 import Employee from '../employeeComponents/employee';
-import LeveComponent from '../employeeComponents/LeveComponent';
+import LeveComponent from '../employeeComponents/leave/LeveComponent';
 import HrPolicies from '../employeeComponents/hrPolicies';
 import HrDocuments from '../employeeComponents/hrDocuments';
 import Recruitment from '../employeeComponents/recruitment';
