@@ -2,6 +2,34 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaPencilAlt } from "react-icons/fa";
 
+
+// const timeInMinutes = convertToMinutes(attendance.time_in);
+//       const timeOutMinutes = convertToMinutes(time_out);
+//       const shiftOutMinutes = convertToMinutes(shift.shift_out);
+ 
+//       // Calculate total work duration
+//       const total_work_duration = formatMinutes(timeOutMinutes - timeInMinutes);
+ 
+      // Calculate early out (if time_out is before shift_out)
+    //   let early_out = "N/A";
+    //   if (timeOutMinutes < shiftOutMinutes) {
+    //       early_out = formatMinutes(shiftOutMinutes - timeOutMinutes);
+    //   }
+ 
+    //   // Determine status based on total work duration
+    //   let status = attendance.status;
+ 
+    //   if (timeOutMinutes - timeInMinutes < 240) {
+    //       status = "Half-Day"; // Less than 4 hours worked
+    //         // Update the attendance record
+    //   attendance.time_out = time_out;
+    //   attendance.total_work_duration = total_work_duration;
+    //   attendance.early_out = early_out;
+    //   attendance.record_clock_out = true;
+    //   attendance.status = status;
+ 
+    //   await attendance.save();
+
 const AttendanceModal = ({ showModal, onClose, setShowModal, emp_id, selectedDate }) => {
     const [punchInTime, setPunchInTime] = useState("");
     const [punchOutTime, setPunchOutTime] = useState("");
