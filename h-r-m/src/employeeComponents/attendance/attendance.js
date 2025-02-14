@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
- 
+import { Link } from "react-router-dom";
 import AttendanceCalendar from './attendanceCAlender';
 import AttendanceList from './attendancelist';
 import InfoSections from './attendanceInfo';
@@ -50,7 +50,7 @@ const Attendance = () => {
           <h1 className="text-xl font-semibold">Attendance for 2025-Feb</h1>
           <div className="flex gap-2">
             <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">Pending Request (0)</span>
-            <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">System Triggered Leave (2)</span>
+           <Link to="/holidayList"><span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">Holiday List </span></Link> 
           </div>
         </div>
         <button className="px-4 py-1 bg-indigo-400 text-sm text-white font-bold">APPLY</button>

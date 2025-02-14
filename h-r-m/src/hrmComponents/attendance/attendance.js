@@ -3,6 +3,7 @@ import axios from "axios";
 import { Pencil } from 'lucide-react';
 import { AttendanceModal, AttendanceButton } from "./attendanceModel";
 import  {DisplayAttendance} from "./displayAttendance";
+import { Link } from "react-router-dom";
 
 
 const Attendance = () => {
@@ -325,21 +326,35 @@ const Attendance = () => {
   
   return (
     <div className="p-4 h-full flex flex-col">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">Employee Attendance</h2>
-        <div className="flex flex-col items-center gap-3 p-4">
-          <label className="text-lg font-semibold text-gray-700">Select a Date:</label>
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="border border-gray-300 p-2 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          />
-          {selectedDate && (
-            <p className="text-gray-600">Selected Date: <strong>{selectedDate}</strong></p>
-          )}
-        </div>
+     <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+  <div className="flex flex-wrap justify-between items-center mb-6">
+    <h2 className="text-2xl font-bold text-gray-800">Employee Attendance</h2>
+    <Link 
+      to="/holidayList" 
+      className="text-lg font-semibold bg-indigo-400 p-2 hover:underline hover:text-blue-800"
+    >
+      Holiday List
+    </Link>
+  </div>
+
+  <div className="bg-gray-100 p-6 rounded-lg flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <label className="text-lg font-semibold text-gray-700">Select a Date:</label>
+      <input
+        type="date"
+        value={selectedDate}
+        onChange={(e) => setSelectedDate(e.target.value)}
+        className="border border-gray-300 p-2 rounded-md mt-2 focus:ring-2 focus:ring-blue-500 focus:outline-none w-full md:w-64"
+      />
+    </div>
+    {selectedDate && (
+      <div className="text-lg text-gray-600 bg-white p-3 rounded-md shadow-md">
+        📅 Selected Date: <strong className="text-blue-700">{selectedDate}</strong>
       </div>
+    )}
+  </div>
+</div>
+
 
       <div className="bg-white rounded-lg shadow-md overflow-auto">
         <table className="min-w-full">
