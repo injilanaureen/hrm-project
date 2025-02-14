@@ -24,6 +24,7 @@ import BlueBox from '../employeeComponents/blueBox';
 import Login from '../Login';
 import EditPersonalDetails from '../employeeComponents/editpersonaldetails';
 import ChangePassword from '../changePassword';
+import HolidayList from '../employeeComponents/holidayList';
 const EmployeeRouters = () => {
   return (
   
@@ -52,6 +53,7 @@ const EmployeeRouters = () => {
           <Route path="employeepersonaldetails/:empId" element={<EmployeePersonalDetails />} />
           <Route path="editpersonaldetails/:empId" element={<EditPersonalDetails />} />
           <Route path="changepassword" element={<ChangePassword />} />
+          <Route path="holidayList" element={<HolidayList />} />
 
 
         </Route>

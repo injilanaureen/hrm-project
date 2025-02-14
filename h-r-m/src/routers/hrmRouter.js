@@ -21,7 +21,7 @@ import Evolve from '../hrmComponents/evolve';
 import EPFOWebite from '../hrmComponents/epfoWebite';
 import Policies from '../hrmComponents/policies';
 import BlueBox from '../hrmComponents/blueBox';
-
+import HolidayList from '../hrmComponents/holidayList';
 import EmployeeOverview from '../hrmComponents/employeeOverview';
 import Personaldetails from '../hrmComponents/personalDetails';
 import ChangePassword from '../changePassword';
@@ -56,6 +56,7 @@ const HrmRouters = () => {
           <Route path="employeeoverview/:id" element={<EmployeeOverview />} />
           <Route path="personaldetails/:id" element={<Personaldetails />} />
           <Route path="changepassword" element={<ChangePassword />} />
+          <Route path="holidayList" element={<HolidayList />} />
 
 
         </Route>
